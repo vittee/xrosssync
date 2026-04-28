@@ -2,6 +2,10 @@
 
 #include "WiFi.h"
 
+namespace {
+    static constexpr auto kLogTag = "App";
+}
+
 #ifdef XROSSSYNC_DEBUG
 UDPPrint App::udpPrint;
 #endif
