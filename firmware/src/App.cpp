@@ -46,7 +46,7 @@ bool App::init() {
     buttonEventQueue = xQueueCreate(32, sizeof(ButtonEvent));
 
     xTaskCreatePinnedToCore([](void* inst) {
-        reinterpret_cast<App*>(inst)->buttonTask();
+        static_cast<App*>(inst)->buttonTask();
     }, "button_task", 8192, this, 2, nullptr, 1);
 
     pinMode(PIN_BUTTON_1, INPUT_PULLUP);
@@ -56,7 +56,7 @@ bool App::init() {
     attachInterruptArg(buttons[1].pin, buttonISR, (void*)&buttons[1], CHANGE);
 
     xTaskCreatePinnedToCore([](void* inst) {
-        reinterpret_cast<App*>(inst)->touchTask();
+        static_cast<App*>(inst)->touchTask();
     }, "touch_task", 8192, this, 2, &touchTaskHandle, 1);
 
     attachInterruptArg(PIN_TOUCH_INT, touchISR, (void*)this, FALLING);
@@ -64,7 +64,7 @@ bool App::init() {
     inputEventQueue = xQueueCreate(32, sizeof(InputEvent));
 
     xTaskCreatePinnedToCore([](void* inst) {
-        reinterpret_cast<App*>(inst)->handleInput();
+        static_cast<App*>(inst)->handleInput();
     }, "input_handler_task", 8192, this, 1, nullptr, 1);
 
     return true;
