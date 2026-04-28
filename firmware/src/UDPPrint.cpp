@@ -63,6 +63,6 @@ void UDPPrint::flush() {
         m_udp.write(m_buf, m_len);
         m_udp.endPacket();
     }
-    
+
     m_len = 0;
 }
