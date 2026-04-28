@@ -88,10 +88,6 @@ private:
 
     void handleInput();
 
-#ifdef XROSSSYNC_DEBUG
-    UDPPrint udpPrint;
-#endif
-
     Print *dbp{nullptr};
     Display display;
 
@@ -106,6 +102,10 @@ private:
 
     QueueHandle_t inputEventQueue;
     InputEvent lastInputEvent{};
+
+#ifdef XROSSSYNC_DEBUG
+    static UDPPrint udpPrint;
+#endif
 
     static constexpr uint8_t PIN_BUTTON_1 = 0;
     static constexpr uint8_t PIN_BUTTON_2 = 14;

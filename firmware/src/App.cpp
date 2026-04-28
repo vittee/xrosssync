@@ -2,18 +2,18 @@
 
 #include "WiFi.h"
 
+#ifdef XROSSSYNC_DEBUG
+UDPPrint App::udpPrint;
+#endif
+
 App::App() {
 
 }
 
 bool App::init() {
-#ifdef XROSSSYNC_DEBUG
-    udpPrint.setDestination(WiFi.broadcastIP(), 5005);
-    dbp = &udpPrint;
-#else
     dbp = &Serial;
-#endif
-    dbp->println("Starting");
+
+    ESP_LOGI("App", "Starting");
 
     if (!display.init()) {
         dbp->println("Display initialization failed");
@@ -36,6 +36,18 @@ bool App::init() {
         display.print('.');
         delay(100);
     }
+
+
+#ifdef XROSSSYNC_DEBUG
+    udpPrint.setDestination(WiFi.broadcastIP(), 5005);
+    dbp = &udpPrint;
+
+    esp_log_set_vprintf([](const char *format, va_list args) -> int {
+        char buffer[512];
+        int len = vsnprintf(buffer, sizeof(buffer), format, args);
+        return len > 0 ? udpPrint.print(buffer) : 0;
+    });
+#endif
 
     display.fillScreen(TFT_BLACK);
     display.setCursor(0, 0);
@@ -334,16 +346,15 @@ void App::handleInput() {
         if (xQueueReceive(inputEventQueue, &event, portMAX_DELAY)) {
             switch (event.type) {
                 case InputEventType::Button:
-                    Serial.println("Button" + String(event.button.button) + " " + String(event.button.pressed));
+                    ESP_LOGI(kLogTag, "Button%d %d", event.button.button, event.button.pressed);
                     break;
 
-
                 case InputEventType::Home:
-                    Serial.println("Home " + String(static_cast<uint8_t>(event.home.flag)));
+                    ESP_LOGI(kLogTag, "Home %d", static_cast<uint8_t>(event.home.flag));
                     break;
 
                 case InputEventType::Touch:
-                    Serial.printf("Touch flag=%d, x=%d, y=%d\n", static_cast<uint8_t>(event.touch.flag), event.touch.point.x, event.touch.point.y);
+                    ESP_LOGI(kLogTag, "Touch flag=%d, x=%d, y=%d", static_cast<uint8_t>(event.touch.flag), event.touch.point.x, event.touch.point.y);
                     break;
 
             }
