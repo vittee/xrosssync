@@ -136,11 +136,11 @@ void App::Display::selfTest() {
     int colors[3]{TFT_RED, TFT_GREEN, TFT_BLUE};
     for (int i = 0; i < 3; i++) {
         fillScreen(colors[i]);
-        delay(300);
+        delay(200);
     }
 
     drawTestPattern();
-    delay(3000);
+    delay(1000);
 }
 
 void App::Display::drawGrad(int y, int h, uint16_t r, uint16_t g, uint16_t b) {
@@ -161,19 +161,19 @@ void App::Display::drawTestPattern()
     auto h = height();
 
     drawGrad(0, h, 255, 0, 0);
-    delay(200);
+    delay(150);
     drawGrad(0, h, 0, 255, 0);
-    delay(200);
+    delay(150);
     drawGrad(0, h, 0, 0, 255);
-    delay(200);
+    delay(150);
     drawGrad(0, h, 255, 255, 0);
-    delay(200);
+    delay(150);
     drawGrad(0, h, 255, 0, 255);
-    delay(200);
+    delay(150);
     drawGrad(0, h, 0, 255, 255);
-    delay(200);
+    delay(150);
     drawGrad(0, h, 255, 255, 255);
-    delay(200);
+    delay(150);
 
     auto bw = w / 7;
     fillScreen(TFT_BLACK);
