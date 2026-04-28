@@ -53,8 +53,6 @@ bool App::init() {
     display.setCursor(0, 0);
     display.println("IP: " + WiFi.localIP().toString());
 
-    delay(1000);
-
     buttonEventQueue = xQueueCreate(32, sizeof(ButtonEvent));
 
     xTaskCreatePinnedToCore([](void* inst) {
