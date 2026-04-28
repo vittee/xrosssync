@@ -7,6 +7,8 @@
 #include "UDPPrint.h"
 #endif
 
+#include "Osc.h"
+
 class App {
 public:
     App();
@@ -102,6 +104,8 @@ private:
 
     QueueHandle_t inputEventQueue;
     InputEvent lastInputEvent{};
+
+    Osc osc;
 
 #ifdef XROSSSYNC_DEBUG
     static UDPPrint udpPrint;
