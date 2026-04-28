@@ -1,6 +1,6 @@
 #include "App.h"
 
-#include "WiFi.h"
+#include <WiFi.h>
 
 namespace {
     static constexpr auto kLogTag = "App";
@@ -26,6 +26,7 @@ bool App::init() {
 
     display.setRotation(0);
     display.setBrightness(255);
+
     display.selfTest();
 
     display.fillScreen(TFT_BLACK);
