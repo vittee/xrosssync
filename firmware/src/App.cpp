@@ -288,6 +288,24 @@ void App::touchTask() {
                 case TouchFlag::Contact:
                     // Track non-home touch
                     if (isHome) {
+                        if (lastInputEvent.type == InputEventType::Touch) {
+                            // moving out of home button
+
+                            // explicitly add the touch up and home down event
+                            InputEvent explicitEvent = {};
+
+                            explicitEvent.type = InputEventType::Touch;
+                            explicitEvent.touch.flag = TouchFlag::Up;
+                            explicitEvent.touch.point = tp;
+                            xQueueSend(inputEventQueue, &explicitEvent, portMAX_DELAY);
+
+                            explicitEvent.type = InputEventType::Home;
+                            explicitEvent.home.flag = TouchFlag::Down;
+                            xQueueSend(inputEventQueue, &explicitEvent, portMAX_DELAY);
+
+                            lastInputEvent = explicitEvent;
+                        }
+
                         continue;
                     }
 
@@ -305,6 +323,8 @@ void App::touchTask() {
                         explicitEvent.touch.flag = TouchFlag::Down;
                         explicitEvent.touch.point = tp;
                         xQueueSend(inputEventQueue, &explicitEvent, portMAX_DELAY);
+
+                        lastInputEvent = explicitEvent;
                     }
 
                     if ((lastTouchPoint.x == tp.x) && (lastTouchPoint.y == tp.y)) {
