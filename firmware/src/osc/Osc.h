@@ -7,8 +7,13 @@
 class Osc {
 public:
     Osc();
+    ~Osc();
 
-    void begin(const char* ipAddress, uint16_t port = 10024);
+    inline void setAddress(const char* ipAddress, uint16_t port = 10024);
+    void setAddress(IPAddress ipAddress, uint16_t port = 10024);
+
+    void start();
+    void stop();
 
     bool send(OSCMessage& msg, TickType_t timeout);
     bool receive(OSCMessage& msg, TickType_t timeout);
@@ -17,6 +22,8 @@ private:
 
     void receivePacket();
     void sendPacket();
+
+    bool running = false;
 
     IPAddress ipAddr;
     uint16_t port;

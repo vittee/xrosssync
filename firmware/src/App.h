@@ -7,7 +7,7 @@
 #include "logging/UDPPrint.h"
 #endif
 
-#include "Osc.h"
+#include "osc/Osc.h"
 
 class App {
 public:

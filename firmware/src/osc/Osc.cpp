@@ -17,21 +17,42 @@ Osc::Osc()
     txQueue = xQueueCreate(8, sizeof(RawOsc));
 }
 
-void Osc::begin(const char* ipAddress, uint16_t port) {
-    if (this->ipAddr != INADDR_NONE) {
-        return;
-    }
+Osc::~Osc() {
+    stop();
+}
 
+void Osc::setAddress(const char* ipAddress, uint16_t port) {
+    setAddress(ipAddress, port);
+}
+
+void Osc::setAddress(IPAddress ipAddress, uint16_t port) {
     this->ipAddr = ipAddress;
     this->port = port;
+}
+
+void Osc::start() {
+    if (running) return;
+
+    running = true;
 
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<Osc*>(inst)->run();
     }, "osc_task", 8192, this, 3, &taskHandle, 1);
 }
 
+void Osc::stop() {
+    if (!running) return;
+
+    running = false;
+    vTaskDelete(taskHandle);
+    vQueueDelete(rxQueue);
+    vQueueDelete(txQueue);
+
+    taskHandle = 0;
+}
+
 void Osc::run() {
-    for (;;) {
+    while (running) {
         receivePacket();
         sendPacket();
 
@@ -83,7 +104,6 @@ bool Osc::receive(OSCMessage& msg, TickType_t timeout) {
     if (xQueueReceive(rxQueue, &raw, timeout) != pdTRUE) {
         return false;
     }
-
 
     msg.fill(raw.data, raw.size);
     return !msg.hasError();
