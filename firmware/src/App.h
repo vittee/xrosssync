@@ -7,7 +7,7 @@
 #include "logging/UDPPrint.h"
 #endif
 
-#include "osc/Osc.h"
+#include "xr18/XR18Client.h"
 
 class App {
 public:
@@ -105,7 +105,7 @@ private:
     QueueHandle_t inputEventQueue;
     InputEvent lastInputEvent{};
 
-    Osc osc;
+    xr18::XR18Client client;
 
 #ifdef XROSSSYNC_DEBUG
     static UDPPrint udpPrint;
