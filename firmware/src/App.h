@@ -4,7 +4,7 @@
 #include <LovyanGFX.hpp>
 
 #ifdef XROSSSYNC_DEBUG
-#include "UDPPrint.h"
+#include "logging/UDPPrint.h"
 #endif
 
 #include "Osc.h"
