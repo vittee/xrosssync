@@ -29,7 +29,8 @@ Osc::~Osc() {
 }
 
 void Osc::setAddress(const char* ipAddress, uint16_t port) {
-    setAddress(ipAddress, port);
+    IPAddress addr(ipAddress);
+    setAddress(addr, port);
 }
 
 void Osc::setAddress(IPAddress ipAddress, uint16_t port) {
