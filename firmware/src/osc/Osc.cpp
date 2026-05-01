@@ -1,6 +1,8 @@
 #include "Osc.h"
 #include "BufferPrint.h"
 
+#include "logging/dbp.h"
+
 namespace {
     static constexpr int kMaxPacketSize = 256;
     static constexpr auto kLogTag = "Osc";
@@ -89,8 +91,13 @@ void Osc::sendPacket() {
     OutgoingOsc pkt{};
     int count = 4;
     while (count-- > 0 && xQueueReceive(txQueue, &pkt, 0)) {
-        ESP_LOGD(kLogTag, "Sending to: %s", pkt.dst.toString().c_str());
+
+#ifdef XROSSSYNC_DEBUG
+        ESP_LOGD(kLogTag, "Sending to: %s, size=%d", pkt.dst.toString().c_str(), pkt.size);
+#endif
+
         if (pkt.dst != INADDR_NONE) {
+            hexdump(pkt.data, pkt.size, dbp);
             udp.beginPacket(pkt.dst, port);
             udp.write(pkt.data, pkt.size);
             udp.endPacket();

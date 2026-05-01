@@ -6,9 +6,6 @@
 
 class UDPPrint : public Print {
 public:
-    UDPPrint();
-    ~UDPPrint();
-
     size_t write(uint8_t c) override;
     size_t write(const uint8_t *buffer, size_t size) override;
 
@@ -21,7 +18,11 @@ private:
     WiFiUDP m_udp;
     IPAddress m_ip = INADDR_NONE;
     uint16_t m_port;
-    uint8_t *m_buf;
+    uint8_t m_buf[512];
     size_t m_bufSize = 512;
     size_t m_len = 0;
 };
+
+#ifdef XROSSSYNC_DEBUG
+inline UDPPrint udpPrint;
+#endif

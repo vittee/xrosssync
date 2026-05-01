@@ -6,17 +6,11 @@ namespace {
     static constexpr auto kLogTag = "App";
 }
 
-#ifdef XROSSSYNC_DEBUG
-UDPPrint App::udpPrint;
-#endif
-
 App::App() {
 
 }
 
 bool App::init() {
-    dbp = &Serial;
-
     ESP_LOGI("App", "Starting");
 
     if (!display.init()) {
@@ -45,7 +39,6 @@ bool App::init() {
 
 #ifdef XROSSSYNC_DEBUG
     udpPrint.setDestination(WiFi.broadcastIP(), 5005);
-    dbp = &udpPrint;
 
     esp_log_set_vprintf([](const char *format, va_list args) -> int {
         char buffer[512];

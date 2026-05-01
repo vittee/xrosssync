@@ -4,7 +4,7 @@
 #include <LovyanGFX.hpp>
 
 #ifdef XROSSSYNC_DEBUG
-#include "logging/UDPPrint.h"
+#include "logging/dbp.h"
 #endif
 
 #include "xr18/XR18Client.h"
@@ -90,7 +90,6 @@ private:
 
     void handleInput();
 
-    Print *dbp{nullptr};
     Display display;
 
     QueueHandle_t buttonEventQueue;
@@ -106,10 +105,6 @@ private:
     InputEvent lastInputEvent{};
 
     xr18::XR18Client client;
-
-#ifdef XROSSSYNC_DEBUG
-    static UDPPrint udpPrint;
-#endif
 
     static constexpr uint8_t PIN_BUTTON_1 = 0;
     static constexpr uint8_t PIN_BUTTON_2 = 14;
