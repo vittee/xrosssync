@@ -21,6 +21,7 @@ private:
     uint8_t m_buf[512];
     size_t m_bufSize = 512;
     size_t m_len = 0;
+    bool m_flushing = false;
 };
 
 #ifdef XROSSSYNC_DEBUG

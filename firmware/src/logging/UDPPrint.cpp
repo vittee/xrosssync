@@ -49,15 +49,17 @@ int UDPPrint::availableForWrite() {
 }
 
 void UDPPrint::flush() {
-    if (m_len == 0) {
+    if (m_len == 0 || m_flushing) {
         return;
     }
 
     if (m_ip != INADDR_NONE) {
+        m_flushing = true;
         m_udp.beginPacket(m_ip, m_port);
         m_udp.write(m_buf, m_len);
         m_udp.endPacket();
     }
 
+    m_flushing = false;
     m_len = 0;
 }
