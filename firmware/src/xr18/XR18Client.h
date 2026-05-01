@@ -1,7 +1,18 @@
+#pragma once
+
 #include <Arduino.h>
+#include <vector>
+
 #include "osc/Osc.h"
 
 namespace xr18 {
+
+struct MixerInfo {
+    IPAddress ip;
+    String name;
+    String model;
+    String version;
+};
 
 class XR18Client {
 public:
@@ -16,11 +27,32 @@ public:
     }
 
     void start();
+
+    void search();
 private:
     void task();
 
+    void stopSearching();
+
+    void heartbeat();
+
+    bool receive();
+
+    void handleSTATUS(OSCMessage &msg);
+
+    void handleXINFO(OSCMessage &msg);
+
     bool running = false;
     TaskHandle_t taskHandle;
+
+    bool connected = false;
+    unsigned long lastHeartbeat = 0;
+    unsigned long lastVitalSign = 0;
+
+    bool searching = false;
+    unsigned long searchStartTime = 0;
+
+    std::vector<MixerInfo> mixers{1};
 
     Osc osc;
 };

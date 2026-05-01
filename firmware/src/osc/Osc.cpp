@@ -9,12 +9,17 @@ namespace {
         uint8_t data[kMaxPacketSize];
         size_t size;
     };
+
+    struct OutgoingOsc : RawOsc {
+        IPAddress dst;
+        uint16_t port;
+    };
 }
 
 Osc::Osc()
 {
     rxQueue = xQueueCreate(8, sizeof(RawOsc));
-    txQueue = xQueueCreate(8, sizeof(RawOsc));
+    txQueue = xQueueCreate(8, sizeof(OutgoingOsc));
 }
 
 Osc::~Osc() {
@@ -81,22 +86,33 @@ void Osc::receivePacket() {
 }
 
 void Osc::sendPacket() {
-    RawOsc raw{};
+    OutgoingOsc pkt{};
     int count = 4;
-    while (count-- > 0 && xQueueReceive(txQueue, &raw, 0)) {
-        udp.beginPacket(ipAddr, port);
-        udp.write(raw.data, raw.size);
-        udp.endPacket();
+    while (count-- > 0 && xQueueReceive(txQueue, &pkt, 0)) {
+        ESP_LOGD(kLogTag, "Sending to: %s", pkt.dst.toString().c_str());
+        if (pkt.dst != INADDR_NONE) {
+            udp.beginPacket(pkt.dst, port);
+            udp.write(pkt.data, pkt.size);
+            udp.endPacket();
+        }
     }
 }
 
-bool Osc::send(OSCMessage& msg, TickType_t timeout) {
-    RawOsc raw{};
-    BufferPrint p(raw.data, kMaxPacketSize);
-    msg.send(p);
-    raw.size = p.size();
+bool Osc::send(OSCMessage& msg, TickType_t timeout, IPAddress destination ) {
+    OutgoingOsc pkt{};
+    pkt.dst = destination != INADDR_NONE ? destination : ipAddr;
+    pkt.port = port;
 
-    return xQueueSend(txQueue, &raw, timeout) == pdTRUE;
+    if (pkt.dst == INADDR_NONE) {
+        return false;
+    }
+
+    BufferPrint p(pkt.data, kMaxPacketSize);
+    msg.send(p);
+    pkt.size = p.size();
+
+
+    return xQueueSend(txQueue, &pkt, timeout) == pdTRUE;
 }
 
 bool Osc::receive(OSCMessage& msg, TickType_t timeout) {

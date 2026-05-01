@@ -82,6 +82,9 @@ bool App::init() {
         static_cast<App*>(inst)->handleInput();
     }, "input_handler_task", 8192, this, 1, nullptr, 1);
 
+    client.start();
+    client.search();
+
     return true;
 }
 
