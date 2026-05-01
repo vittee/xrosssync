@@ -20,8 +20,8 @@ namespace {
 
 Osc::Osc()
 {
-    rxQueue = xQueueCreate(8, sizeof(RawOsc));
-    txQueue = xQueueCreate(8, sizeof(OutgoingOsc));
+    rxQueue = xQueueCreate(32, sizeof(RawOsc));
+    txQueue = xQueueCreate(32, sizeof(OutgoingOsc));
 }
 
 Osc::~Osc() {
@@ -61,17 +61,19 @@ void Osc::stop() {
 
 void Osc::run() {
     while (running) {
-        receivePacket();
-        sendPacket();
+        int cost = 1;
 
-        delay(5); // yield
+        cost += receivePacket();
+        cost += sendPacket();
+
+        vTaskDelay(pdMS_TO_TICKS(cost * 2 + 1)); // yield
     }
 }
 
-void Osc::receivePacket() {
+bool Osc::receivePacket() {
     auto size = udp.parsePacket();
     if (size <= 0) {
-        return;
+        return false;
     }
 
     if (size > kMaxPacketSize) {
@@ -79,31 +81,52 @@ void Osc::receivePacket() {
         while (udp.available()) {
             udp.read(blackhole, sizeof(blackhole));
         }
-        return;
+
+        return false;
     }
 
     RawOsc raw{};
     raw.size = udp.read(raw.data, size);
 
-    xQueueSend(rxQueue, &raw, 0);
-}
-
-void Osc::sendPacket() {
-    OutgoingOsc pkt{};
-    int count = 4;
-    while (count-- > 0 && xQueueReceive(txQueue, &pkt, 0)) {
-
 #ifdef XROSSSYNC_DEBUG
-        ESP_LOGD(kLogTag, "Sending to: %s, size=%d", pkt.dst.toString().c_str(), pkt.size);
+        ESP_LOGD(kLogTag, "Receiving from: %s, size=%d", udp.remoteIP().toString().c_str(), raw.size);
 #endif
 
-        if (pkt.dst != INADDR_NONE) {
-            hexdump(pkt.data, pkt.size, dbp);
-            udp.beginPacket(pkt.dst, port);
-            udp.write(pkt.data, pkt.size);
-            udp.endPacket();
-        }
+    xQueueSend(rxQueue, &raw, 0);
+
+    return true;
+}
+
+bool Osc::sendPacket() {
+    OutgoingOsc pkt{};
+
+    if (!xQueueReceive(txQueue, &pkt, 0)) {
+        return false;
     }
+
+    if (pkt.dst == INADDR_NONE) {
+        return false;
+    }
+
+#ifdef XROSSSYNC_DEBUG
+    ESP_LOGD(kLogTag, "Sending to: %s, size=%d", pkt.dst.toString().c_str(), pkt.size);
+#endif
+
+    bool sent = false;
+    if (udp.beginPacket(pkt.dst, port)) {
+        udp.write(pkt.data, pkt.size);
+        sent = udp.endPacket();
+    }
+
+    if (!sent) {
+        xQueueSendToFront(txQueue, &pkt, 0);
+    }
+
+#ifdef XROSSSYNC_DEBUG
+    ESP_LOGD(kLogTag, "-------- Sent(%d) --------", sent);
+#endif
+
+    return sent;
 }
 
 bool Osc::send(OSCMessage& msg, TickType_t timeout, IPAddress destination ) {
@@ -118,7 +141,6 @@ bool Osc::send(OSCMessage& msg, TickType_t timeout, IPAddress destination ) {
     BufferPrint p(pkt.data, kMaxPacketSize);
     msg.send(p);
     pkt.size = p.size();
-
 
     return xQueueSend(txQueue, &pkt, timeout) == pdTRUE;
 }

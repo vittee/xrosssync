@@ -22,8 +22,8 @@ public:
 private:
     void run();
 
-    void receivePacket();
-    void sendPacket();
+    bool receivePacket();
+    bool sendPacket();
 
     bool running = false;
 
