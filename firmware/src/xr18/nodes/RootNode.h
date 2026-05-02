@@ -5,6 +5,8 @@
 #include "Nodes.h"
 #include "channels/Channel.h"
 #include "Config.h"
+#include "State.h"
+#include "Action.h"
 #include "osc/Osc.h"
 
 namespace xr18 {
@@ -24,6 +26,9 @@ public:
     inline const std::vector<channels::DCAChannel>& dcas() const { return m_dcas; }
     inline const channels::MainChannel& lr() const { return m_lr; }
     inline const Config& config() const { return m_config; }
+    inline const State& state() const { return m_state; }
+    inline const Action& action() const { return m_action; }
+
 private:
     Osc& osc;
     Nodes ch;
@@ -41,6 +46,8 @@ private:
     channels::MainChannel m_lr;
 
     Config m_config;
+    State m_state;
+    Action m_action;
 };
 
 } // namespace nodes

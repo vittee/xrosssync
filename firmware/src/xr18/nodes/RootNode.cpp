@@ -15,7 +15,9 @@ RootNode::RootNode(Osc& osc)
     fxsend("fxsend", this),
     m_lr("lr", this),
     dca("dca", this),
-    m_config(this)
+    m_config(this),
+    m_state(this),
+    m_action(this)
 {
     type = NodeType::Root;
     root = this;
