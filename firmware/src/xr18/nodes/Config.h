@@ -1,7 +1,7 @@
 #pragma once
 
-#include "xr18/nodes/Node.h"
-#include "xr18/nodes/params/EnumParam.h"
+#include "Node.h"
+#include "params/EnumParam.h"
 
 namespace xr18 {
 namespace nodes {
