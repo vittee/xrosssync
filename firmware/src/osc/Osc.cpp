@@ -130,6 +130,10 @@ bool Osc::sendPacket() {
 }
 
 bool Osc::send(OSCMessage& msg, TickType_t timeout, IPAddress destination ) {
+    if (msg.hasError()) {
+        return false;
+    }
+
     OutgoingOsc pkt{};
     pkt.dst = destination != INADDR_NONE ? destination : ipAddr;
     pkt.port = port;
