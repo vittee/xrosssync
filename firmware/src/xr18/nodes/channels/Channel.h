@@ -25,15 +25,17 @@ public:
     InputChannel(String name, Node* parent)
         :
         Channel(name, parent, NodeType::Input),
-        mix(this),
-        config(this)
+        m_mix(this),
+        m_config(this)
     {
-
     }
 
+    inline const InputConfig& config() const { return m_config; }
+    inline const MixWithLRAndPan& mix() const { return m_mix; }
+
 private:
-    InputConfig config;
-    MixWithLRAndPan mix;
+    InputConfig m_config;
+    MixWithLRAndPan m_mix;
 };
 
 class ReturnChannel : public Channel {
@@ -41,15 +43,17 @@ public:
     ReturnChannel(String name, Node* parent)
         :
         Channel(name, parent, NodeType::Return),
-        mix(this),
-        config(this)
+        m_mix(this),
+        m_config(this)
     {
-
     }
 
+    inline const ReturnConfig& config() const { return m_config; }
+    const MixWithLRAndPan& mix() const { return m_mix; }
+
 private:
-    ReturnConfig config;
-    MixWithLRAndPan mix;
+    ReturnConfig m_config;
+    MixWithLRAndPan m_mix;
 };
 
 class BusChannel : public Channel {
@@ -57,15 +61,17 @@ public:
     BusChannel(String name, Node* parent)
         :
         Channel(name, parent, NodeType::Bus),
-        config(this),
-        mix(this)
+        m_config(this),
+        m_mix(this)
     {
-
     }
 
+    inline const Config& config() const { return m_config; }
+    const MixWithLRAndPan& mix() const { return m_mix; }
+
 private:
-    Config config;
-    MixWithLRAndPan mix;
+    Config m_config;
+    MixWithLRAndPan m_mix;
 };
 
 class FxSendChannel : public Channel {
@@ -73,15 +79,17 @@ public:
     FxSendChannel(String name, Node* parent)
         :
         Channel(name, parent, NodeType::FxSend),
-        config(this),
-        mix(this)
+        m_config(this),
+        m_mix(this)
     {
-
     }
 
+    inline const Config& config() const { return m_config; }
+    inline const Mix& mix() const { return m_mix; }
+
 private:
-    Config config;
-    Mix mix;
+    Config m_config;
+    Mix m_mix;
 };
 
 class MainChannel : public Channel {
@@ -89,15 +97,17 @@ public:
     MainChannel(String name, Node* parent)
         :
         Channel(name, parent, NodeType::LR),
-        config(this),
-        mix(this)
+        m_config(this),
+        m_mix(this)
     {
-
     }
 
+    inline const Config& config() const { return m_config; }
+    inline const MixWithPan& mix() const { return m_mix; }
+
 private:
-    Config config;
-    MixWithPan mix;
+    Config m_config;
+    MixWithPan m_mix;
 };
 
 /**
@@ -108,16 +118,20 @@ public:
     DCAChannel(String name, Node* parent)
         :
         Node(name, parent),
-        on("on", this, params::kOffOn),
-        fader("fader", this, 1023),
-        config(this)
+        m_on("on", this, params::kOffOn),
+        m_fader("fader", this, 1023),
+        m_config(this)
     {
-
     }
+
+    inline const params::EnumParam& on() const { return m_on; }
+    inline const params::FaderParam& fader() const { return m_fader; }
+    inline const Config& config() const { return m_config; }
+
 private:
-    params::EnumParam on;
-    params::FaderParam fader;
-    Config config;
+    params::EnumParam m_on;
+    params::FaderParam m_fader;
+    Config m_config;
 };
 
 } // namespace channels

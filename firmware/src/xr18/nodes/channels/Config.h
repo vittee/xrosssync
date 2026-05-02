@@ -20,14 +20,17 @@ public:
     Config(Node* parent)
         :
         Node("config", parent),
-        param_name("name", this),
-        param_color("color", this, 0, 15)
+        m_name("name", this),
+        m_color("color", this, 0, 15)
     {
-
     }
+
+    inline const params::StringParam& name() const { return m_name; }
+    inline const params::IntParam& color() const { return m_color; }
+
 private:
-    params::StringParam param_name;
-    params::IntParam param_color;
+    params::StringParam m_name;
+    params::IntParam m_color;
 };
 
 class InputConfig : public Config {
@@ -35,14 +38,17 @@ public:
     InputConfig(Node* parent)
         :
         Config(parent),
-        param_insrc("insrc", this, kInSrcNames),
-        param_rtnsrc("rtnsrc", this, kRtnSrcNames)
+        m_insrc("insrc", this, kInSrcNames),
+        m_rtnsrc("rtnsrc", this, kRtnSrcNames)
     {
-
     }
+
+    inline const params::EnumParam& insrc() const { return m_insrc; }
+    inline const params::EnumParam& rtnsrc() const { return m_rtnsrc; }
+
 private:
-    params::EnumParam param_insrc;
-    params::EnumParam param_rtnsrc;
+    params::EnumParam m_insrc;
+    params::EnumParam m_rtnsrc;
 };
 
 class ReturnConfig : public Config {
@@ -50,12 +56,14 @@ public:
     ReturnConfig(Node* parent)
         :
         Config(parent),
-        param_rtnsrc("rtnsrc", this, kRtnSrcNames)
+        m_rtnsrc("rtnsrc", this, kRtnSrcNames)
     {
-
     }
+
+    inline const params::EnumParam& rtnsrc() const { return m_rtnsrc; }
+
 private:
-    params::EnumParam param_rtnsrc;
+    params::EnumParam m_rtnsrc;
 };
 
 

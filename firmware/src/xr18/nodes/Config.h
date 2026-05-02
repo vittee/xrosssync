@@ -13,15 +13,18 @@ public:
         Node("config", parent),
         mute("mute", this)
     {
-        muteGroups.reserve(4);
+        m_muteGroups.reserve(4);
         for (int i = 0; i < 4; i++) {
-            muteGroups.emplace_back(String(i + 1), &mute, params::kOffOn);
+            m_muteGroups.emplace_back(String(i + 1), &mute, params::kOffOn);
         }
     }
+
+    inline const std::vector<params::EnumParam>& muteGroups() const { return m_muteGroups; }
+
 private:
     Node mute;
 
-    std::vector<params::EnumParam> muteGroups;
+    std::vector<params::EnumParam> m_muteGroups;
 };
 
 } // namespace nodes

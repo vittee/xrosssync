@@ -10,41 +10,41 @@ RootNode::RootNode(Osc& osc)
     osc(osc),
     ch("ch", this),
     rtn("rtn", this),
-    aux("aux", &rtn),
+    m_aux("aux", &rtn),
     bus("bus", this),
     fxsend("fxsend", this),
-    lr("lr", this),
+    m_lr("lr", this),
     dca("dca", this),
-    config(this)
+    m_config(this)
 {
     type = NodeType::Root;
     root = this;
 
-    channels.reserve(16);
+    m_channels.reserve(16);
     for (int i = 0; i < 16; i++) {
         char buf[3];
         snprintf(buf, sizeof(buf), "%02d", i + 1);
-        channels.emplace_back(String(buf), &ch);
+        m_channels.emplace_back(String(buf), &ch);
     }
 
-    fxReturns.reserve(4);
+    m_fxReturns.reserve(4);
     for (int i = 0; i < 4; i++) {
-        fxReturns.emplace_back(String(i + 1), &rtn);
+        m_fxReturns.emplace_back(String(i + 1), &rtn);
     }
 
-    buses.reserve(6);
+    m_buses.reserve(6);
     for (int i = 0; i < 4; i++) {
-        buses.emplace_back(String(i + 1), &bus);
+        m_buses.emplace_back(String(i + 1), &bus);
     }
 
-    fxSends.reserve(4);
+    m_fxSends.reserve(4);
     for (int i = 0; i < 4; i++) {
-        fxSends.emplace_back(String(i + 1), &fxsend);
+        m_fxSends.emplace_back(String(i + 1), &fxsend);
     }
 
-    dcas.reserve(4);
+    m_dcas.reserve(4);
     for (int i = 0; i < 4; i++) {
-        dcas.emplace_back(String(i + 1), &dca);
+        m_dcas.emplace_back(String(i + 1), &dca);
     }
 
     buildPath();

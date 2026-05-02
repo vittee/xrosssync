@@ -18,14 +18,17 @@ public:
     Mix(Node* parent)
         :
         Node("mix", parent),
-        on("on", this, params::kOffOn),
-        fader("fader", this, 1023)
+        m_on("on", this, params::kOffOn),
+        m_fader("fader", this, 1023)
     {
-
     }
+
+    inline const params::EnumParam& on() const { return m_on; }
+    inline const params::FaderParam& fader() const { return m_fader; }
+
 private:
-    params::EnumParam on;
-    params::FaderParam fader;
+    params::EnumParam m_on;
+    params::FaderParam m_fader;
 };
 
 class MixWithLR : public Mix {
@@ -33,12 +36,14 @@ public:
     MixWithLR(Node* parent)
         :
         Mix(parent),
-        lr("lr", this, params::kOffOn)
+        m_lr("lr", this, params::kOffOn)
     {
-
     }
+
+    inline const params::EnumParam& lr() const { return m_lr; }
+
 private:
-    params::EnumParam lr;
+    params::EnumParam m_lr;
 };
 
 class MixWithPan : public Mix {
@@ -46,12 +51,14 @@ public:
     MixWithPan(Node* parent)
         :
         Mix(parent),
-        pan("pan", this, 100, -100.0f, 100.0f, "%+f")
+        m_pan("pan", this, 100, -100.0f, 100.0f, "%+f")
     {
-
     }
+
+    inline const params::LerpParam& pan() const { return m_pan; }
+
 private:
-    params::LerpParam pan;
+    params::LerpParam m_pan;
 };
 
 class MixWithLRAndPan : public MixWithLR {
@@ -59,12 +66,14 @@ public:
     MixWithLRAndPan(Node* parent)
         :
         MixWithLR(parent),
-        pan("pan", this, 100, -100.0f, 100.0f, "%+f")
+        m_pan("pan", this, 100, -100.0f, 100.0f, "%+f")
     {
-
     }
+
+    inline const params::LerpParam& pan() const { return m_pan; }
+
 private:
-    params::LerpParam pan;
+    params::LerpParam m_pan;
 };
 
 } // namespace channels
