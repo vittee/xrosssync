@@ -1,8 +1,6 @@
 #include "Osc.h"
 #include "BufferPrint.h"
 
-#include "logging/dbp.h"
-
 namespace {
     static constexpr int kMaxPacketSize = 256;
     static constexpr auto kLogTag = "Osc";

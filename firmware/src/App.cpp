@@ -11,10 +11,10 @@ App::App() {
 }
 
 bool App::init() {
-    ESP_LOGI("App", "Starting");
+    ESP_LOGI(kLogTag, "Starting");
 
     if (!display.init()) {
-        dbp->println("Display initialization failed");
+        ESP_LOGE(kLogTag, "Display initialization failed");
         return false;
     }
 
