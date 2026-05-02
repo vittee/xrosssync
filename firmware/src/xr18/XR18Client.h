@@ -34,6 +34,8 @@ private:
 
     void stopSearching();
 
+    void synchronize();
+
     void heartbeat();
 
     bool receive();

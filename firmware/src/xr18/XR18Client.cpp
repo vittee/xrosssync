@@ -63,15 +63,26 @@ void XR18Client::task() {
 void XR18Client::stopSearching() {
     ESP_LOGD(kLogTag, "Autoconnect connected=%d, ip=%s, mixers found=%d", connected, osc.getAddress().toString().c_str(), mixers.size());
     if (!connected && mixers.size() > 0) {
+        connected = true;
         setAddress(mixers.front().ip);
         heartbeat();
-        connected = true;
+        synchronize();
     }
 }
 
+void XR18Client::synchronize() {
+}
+
 void XR18Client::heartbeat() {
-    OSCMessage msg("/status");
-    send(msg, pdMS_TO_TICKS(1));
+    {
+        OSCMessage msg("/status");
+        send(msg, pdMS_TO_TICKS(1));
+    }
+
+    {
+        OSCMessage msg("/xremotenfb");
+        send(msg, pdMS_TO_TICKS(1));
+    }
 
     lastHeartbeat = millis();
 }
@@ -114,8 +125,9 @@ void XR18Client::handleSTATUS(OSCMessage &msg) {
     ESP_LOGD(kLogTag, "Got Status, connected=%d, searching=%d, ip=%s, name=%s", connected, searching, ip, name);
 #endif
 
-    if (!searching) {
+    if (!searching && !connected) {
         connected = true;
+        synchronize();
     }
 }
 
