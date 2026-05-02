@@ -7,7 +7,9 @@ namespace {
 
 namespace xr18 {
 
-XR18Client::XR18Client() {
+XR18Client::XR18Client()
+    : rootNode(osc)
+{
 
 }
 
@@ -108,7 +110,14 @@ bool XR18Client::receive() {
         return true;
     }
 
-    ESP_LOGD(kLogTag, "Got %s", msg.getAddress());
+    auto node = rootNode.find(msg.getAddress(), msg.getAddressLength());
+
+    if (node) {
+        ESP_LOGD(kLogTag, "Found node: %s", node->getPath().c_str());
+        node->applyOsc(msg);
+    } else {
+        ESP_LOGD(kLogTag, "Node not found for osc: %s", msg.getAddress());
+    }
 
     return true;
 }

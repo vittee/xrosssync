@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "osc/Osc.h"
+#include "nodes/RootNode.h"
 
 namespace xr18 {
 
@@ -55,6 +56,8 @@ private:
     unsigned long searchStartTime = 0;
 
     std::vector<MixerInfo> mixers{1};
+
+    nodes::RootNode rootNode;
 
     Osc osc;
 };
