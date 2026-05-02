@@ -9,18 +9,22 @@ namespace params {
 class IntParam : public Param {
 public:
     IntParam(String name, nodes::Node* parent, int min, int max)
-        : Param(name, parent), value(min), min(min), max(max)
+        : Param(name, parent), m_value(min), m_min(min), m_max(max)
     {
         paramType = ParamType::Int;
     }
 
+    inline int value() const { return m_value; }
+
+    void setValue(int value);
+
     virtual bool applyOsc(OSCMessage& msg, int index) override;
 
-    virtual String formatValue() const override { return String(value); }
+    virtual String formatValue() const override { return String(m_value); }
 protected:
-    int value;
-    int min;
-    int max;
+    int m_value;
+    int m_min;
+    int m_max;
 };
 
 } // namespace params

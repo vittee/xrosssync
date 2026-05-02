@@ -16,7 +16,8 @@ public:
 
     virtual bool applyOsc(OSCMessage& msg, int index) override;
 
-    virtual String formatValue() const override { return String(names[value]); }
+    virtual String formatValue() const override { return String(names[m_value]); }
+
 private:
     std::vector<const char*> names;
 };

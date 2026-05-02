@@ -9,9 +9,9 @@ bool EnumParam::applyOsc(OSCMessage& msg, int index) {
         return false;
     }
 
-    value = msg.getInt(index);
+    m_value = msg.getInt(index);
 
-    ESP_LOGD("Enum Param", "Applying OSC [%s] %d => %s", name.c_str(), value, formatValue().c_str());
+    ESP_LOGD("Enum Param", "Applying OSC [%s] %d => %s", name.c_str(), m_value, formatValue().c_str());
     return true;
 }
 

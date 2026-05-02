@@ -18,7 +18,9 @@ public:
 
     virtual String formatValue() const override = 0;
 
-    virtual float getValue() const = 0;
+    virtual float getFloatValue() const = 0;
+
+    virtual void setFloatValue(float newValue) = 0;
 };
 
 } // namespace params

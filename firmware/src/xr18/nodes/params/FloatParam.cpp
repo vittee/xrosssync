@@ -11,12 +11,12 @@ bool FloatParam::applyOsc(OSCMessage& msg, int index) {
 
     auto floatValue = msg.getFloat(index);
 
-    int v = (int)((max + 0.5) * floatValue);
-    if (v > max) v = max;
+    int v = (int)((m_max + 0.5) * floatValue);
+    if (v > m_max) v = m_max;
 
-    value = v;
+    m_value = v;
 
-    ESP_LOGD("FloatParam", "Applying OSC [%s] %d => ", name.c_str(), value, formatValue().c_str());
+    ESP_LOGD("FloatParam", "Applying OSC [%s] %d => ", name.c_str(), m_value, formatValue().c_str());
     return true;
 }
 
