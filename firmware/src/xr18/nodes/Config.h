@@ -1,3 +1,5 @@
+#pragma once
+
 #include "xr18/nodes/Node.h"
 #include "xr18/nodes/params/EnumParam.h"
 
