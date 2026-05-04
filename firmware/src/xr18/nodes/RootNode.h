@@ -30,6 +30,8 @@ public:
     inline Action& action() { return m_action; }
 
 private:
+    friend class params::Param;
+
     Osc& osc;
     Nodes ch;
     Nodes rtn;

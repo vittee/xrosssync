@@ -16,6 +16,8 @@ public:
 
     virtual bool applyOsc(OSCMessage& msg, int index) override;
 
+    virtual void buildOsc(OSCMessage& msg) override;
+
     virtual String formatValue() const override { return value; }
 private:
     String value;

@@ -20,6 +20,11 @@ bool FloatParam::applyOsc(OSCMessage& msg, int index) {
     return true;
 }
 
+void FloatParam::buildOsc(OSCMessage& msg) {
+    msg.empty();
+    msg.setAddress(path.c_str());
+    msg.set(0, (float)m_value / (float)m_max);
+}
 } // namespace params
 } // namespace nodes
 } // namespace xr18

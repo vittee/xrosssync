@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+#include <vector>
 #include "xr18/nodes/Node.h"
 
 namespace xr18 {
@@ -28,10 +30,21 @@ public:
 
     ParamType getParamType() const { return paramType; }
 
+    virtual bool applyOsc(OSCMessage& msg, int index) = 0;
+
+    virtual void buildOsc(OSCMessage& msg) = 0;
+
     virtual String formatValue() const = 0;
 
+    void onChange(std::function<void()> cb);
+
 protected:
+    void valueChanged();
+
     ParamType paramType;
+
+private:
+    std::vector<std::function<void()>> m_callbacks;
 };
 
 } // namespace params

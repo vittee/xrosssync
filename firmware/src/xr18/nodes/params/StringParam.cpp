@@ -18,6 +18,12 @@ bool StringParam::applyOsc(OSCMessage& msg, int index) {
     return true;
 }
 
+void StringParam::buildOsc(OSCMessage& msg) {
+    msg.empty();
+    msg.setAddress(path.c_str());
+    msg.set(0, value.c_str());
+}
+
 } // namespace params
 } // namespace nodes
 } // namespace xr18
