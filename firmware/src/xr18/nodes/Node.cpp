@@ -1,10 +1,25 @@
 #include "Node.h"
+#include "RootNode.h"
 
 #include "params/IntParam.h"
 #include "params/StringParam.h"
 
 namespace xr18 {
 namespace nodes {
+
+RootNode* Node::getRoot() {
+    Node* current = this;
+
+    while (current->parent != nullptr) {
+        current = current->parent;
+    }
+
+    if (current->type == NodeType::Root) {
+        return static_cast<RootNode*>(current);
+    }
+
+    return nullptr;
+}
 
 void Node::buildPath() {
     String newPath("");

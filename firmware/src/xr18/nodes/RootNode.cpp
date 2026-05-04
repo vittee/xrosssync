@@ -20,7 +20,6 @@ RootNode::RootNode(Osc& osc)
     m_action(this)
 {
     type = NodeType::Root;
-    root = this;
 
     m_channels.reserve(16);
     for (int i = 0; i < 16; i++) {

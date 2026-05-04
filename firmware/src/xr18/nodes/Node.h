@@ -28,7 +28,6 @@ public:
     {
         if (parent) {
             parent->children.emplace_back(this);
-            root = parent->root;
         }
     }
 
@@ -36,15 +35,18 @@ public:
     const String& getName() const { return name; }
     const String& getPath() const { return path; }
 
+    RootNode* getRoot();
+
     virtual bool applyOsc(OSCMessage& msg, int index = 0);
-protected:
+
     void buildPath();
+protected:
+
 
     String name;
     NodeType type;
     //
     Node* parent = nullptr;
-    RootNode* root = nullptr;
     std::vector<Node*> children;
     //
     String path;
