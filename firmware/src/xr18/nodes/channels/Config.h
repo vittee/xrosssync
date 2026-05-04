@@ -25,8 +25,8 @@ public:
     {
     }
 
-    inline const params::StringParam& name() const { return m_name; }
-    inline const params::IntParam& color() const { return m_color; }
+    inline params::StringParam& name() { return m_name; }
+    inline params::IntParam& color() { return m_color; }
 
 private:
     params::StringParam m_name;
@@ -43,8 +43,8 @@ public:
     {
     }
 
-    inline const params::EnumParam& insrc() const { return m_insrc; }
-    inline const params::EnumParam& rtnsrc() const { return m_rtnsrc; }
+    inline params::EnumParam& insrc() { return m_insrc; }
+    inline params::EnumParam& rtnsrc() { return m_rtnsrc; }
 
 private:
     params::EnumParam m_insrc;
@@ -60,7 +60,7 @@ public:
     {
     }
 
-    inline const params::EnumParam& rtnsrc() const { return m_rtnsrc; }
+    inline params::EnumParam& rtnsrc() { return m_rtnsrc; }
 
 private:
     params::EnumParam m_rtnsrc;

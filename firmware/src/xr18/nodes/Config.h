@@ -19,7 +19,7 @@ public:
         }
     }
 
-    inline const std::vector<params::EnumParam>& muteGroups() const { return m_muteGroups; }
+    inline std::vector<params::EnumParam>& muteGroups() { return m_muteGroups; }
 
 private:
     Node mute;

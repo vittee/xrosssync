@@ -23,8 +23,8 @@ public:
     {
     }
 
-    inline const params::EnumParam& on() const { return m_on; }
-    inline const params::FaderParam& fader() const { return m_fader; }
+    inline params::EnumParam& on() { return m_on; }
+    inline params::FaderParam& fader() { return m_fader; }
 
 private:
     params::EnumParam m_on;
@@ -40,7 +40,7 @@ public:
     {
     }
 
-    inline const params::EnumParam& lr() const { return m_lr; }
+    inline params::EnumParam& lr() { return m_lr; }
 
 private:
     params::EnumParam m_lr;
@@ -55,7 +55,7 @@ public:
     {
     }
 
-    inline const params::LerpParam& pan() const { return m_pan; }
+    inline params::LerpParam& pan() { return m_pan; }
 
 private:
     params::LerpParam m_pan;
@@ -70,7 +70,7 @@ public:
     {
     }
 
-    inline const params::LerpParam& pan() const { return m_pan; }
+    inline params::LerpParam& pan() { return m_pan; }
 
 private:
     params::LerpParam m_pan;

@@ -30,8 +30,8 @@ public:
     {
     }
 
-    inline const InputConfig& config() const { return m_config; }
-    inline const MixWithLRAndPan& mix() const { return m_mix; }
+    inline InputConfig& config() { return m_config; }
+    inline MixWithLRAndPan& mix() { return m_mix; }
 
 private:
     InputConfig m_config;
@@ -48,8 +48,8 @@ public:
     {
     }
 
-    inline const ReturnConfig& config() const { return m_config; }
-    const MixWithLRAndPan& mix() const { return m_mix; }
+    inline ReturnConfig& config() { return m_config; }
+    inline MixWithLRAndPan& mix() { return m_mix; }
 
 private:
     ReturnConfig m_config;
@@ -66,8 +66,10 @@ public:
     {
     }
 
+    inline Config& config() { return m_config; }
     inline const Config& config() const { return m_config; }
-    const MixWithLRAndPan& mix() const { return m_mix; }
+    inline MixWithLRAndPan& mix() { return m_mix; }
+    inline const MixWithLRAndPan& mix() const { return m_mix; }
 
 private:
     Config m_config;
@@ -84,8 +86,8 @@ public:
     {
     }
 
-    inline const Config& config() const { return m_config; }
-    inline const Mix& mix() const { return m_mix; }
+    inline Config& config() { return m_config; }
+    inline Mix& mix() { return m_mix; }
 
 private:
     Config m_config;
@@ -102,8 +104,8 @@ public:
     {
     }
 
-    inline const Config& config() const { return m_config; }
-    inline const MixWithPan& mix() const { return m_mix; }
+    inline Config& config() { return m_config; }
+    inline MixWithPan& mix() { return m_mix; }
 
 private:
     Config m_config;
@@ -124,9 +126,9 @@ public:
     {
     }
 
-    inline const params::EnumParam& on() const { return m_on; }
-    inline const params::FaderParam& fader() const { return m_fader; }
-    inline const Config& config() const { return m_config; }
+    inline params::EnumParam& on() { return m_on; }
+    inline params::FaderParam& fader() { return m_fader; }
+    inline Config& config() { return m_config; }
 
 private:
     params::EnumParam m_on;

@@ -15,7 +15,7 @@ public:
     {
     }
 
-    inline const params::EnumParam& clearsolo() const { return m_clearsolo; }
+    inline params::EnumParam& clearsolo() { return m_clearsolo; }
 
 private:
     params::EnumParam m_clearsolo;

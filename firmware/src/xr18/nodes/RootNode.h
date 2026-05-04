@@ -18,16 +18,16 @@ public:
 
     Node* find(const char* path, int len);
 
-    inline const std::vector<channels::InputChannel>& channels() const { return m_channels; }
-    inline const channels::ReturnChannel& aux() const { return m_aux; }
-    inline const std::vector<channels::ReturnChannel>& fxReturns() const { return m_fxReturns; }
-    inline const std::vector<channels::BusChannel>& buses() const { return m_buses; }
-    inline const std::vector<channels::FxSendChannel>& fxSends() const { return m_fxSends; }
-    inline const std::vector<channels::DCAChannel>& dcas() const { return m_dcas; }
-    inline const channels::MainChannel& lr() const { return m_lr; }
-    inline const Config& config() const { return m_config; }
-    inline const State& state() const { return m_state; }
-    inline const Action& action() const { return m_action; }
+    inline std::vector<channels::InputChannel>& channels() { return m_channels; }
+    inline channels::ReturnChannel& aux() { return m_aux; }
+    inline std::vector<channels::ReturnChannel>& fxReturns() { return m_fxReturns; }
+    inline std::vector<channels::BusChannel>& buses() { return m_buses; }
+    inline std::vector<channels::FxSendChannel>& fxSends() { return m_fxSends; }
+    inline std::vector<channels::DCAChannel>& dcas() { return m_dcas; }
+    inline channels::MainChannel& lr() { return m_lr; }
+    inline Config& config() { return m_config; }
+    inline State& state() { return m_state; }
+    inline Action& action() { return m_action; }
 
 private:
     Osc& osc;
