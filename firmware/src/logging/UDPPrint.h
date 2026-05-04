@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Print.h>
-#include <WiFiUdp.h>
+#include <AsyncUDP.h>
 #include <IPAddress.h>
 
 class UDPPrint : public Print {
@@ -15,13 +15,25 @@ public:
     void setDestination(IPAddress ip, uint16_t port);
 
 private:
-    WiFiUDP m_udp;
+    struct LogPacket {
+        uint8_t data[512];
+        size_t len;
+    };
+
+    void senderTask();
+
+    static constexpr size_t kBufSize = 512;
+
+    AsyncUDP m_udp;
     IPAddress m_ip = INADDR_NONE;
     uint16_t m_port;
-    uint8_t m_buf[512];
-    size_t m_bufSize = 512;
+
+    uint8_t m_buf[kBufSize];
     size_t m_len = 0;
     bool m_flushing = false;
+
+    QueueHandle_t m_queue = nullptr;
+    TaskHandle_t m_taskHandle = nullptr;
 };
 
 #ifdef XROSSSYNC_DEBUG
