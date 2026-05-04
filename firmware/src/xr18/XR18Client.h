@@ -24,7 +24,7 @@ public:
     }
 
     inline bool send(OSCMessage& msg, TickType_t timeout) {
-        return osc.send(msg, timeout);
+        return osc.send(msg, timeout, 1);
     }
 
     void start();

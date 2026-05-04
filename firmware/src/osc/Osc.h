@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
-#include <WiFiUdp.h>
+#include <AsyncUDP.h>
 #include <OSCMessage.h>
 
 class Osc {
@@ -17,12 +17,16 @@ public:
     void start();
     void stop();
 
-    bool send(OSCMessage& msg, TickType_t timeout, IPAddress destination = INADDR_NONE);
-    bool receive(OSCMessage& msg, TickType_t timeout);
-private:
-    void run();
+    inline bool send(OSCMessage& msg, TickType_t timeout, uint8_t retries = 1) {
+        return send(msg, timeout, INADDR_NONE, retries);
+    }
 
-    bool receivePacket();
+    bool send(OSCMessage& msg, TickType_t timeout, IPAddress destination = INADDR_NONE, uint8_t retries = 1);
+    bool receive(OSCMessage& msg, TickType_t timeout);
+
+private:
+    void onPacket(AsyncUDPPacket& packet);
+    void txTask();
     bool sendPacket();
 
     bool running = false;
@@ -33,8 +37,7 @@ private:
     QueueHandle_t rxQueue;
     QueueHandle_t txQueue;
 
-    WiFiUDP udp;
-    TaskHandle_t taskHandle;
+    AsyncUDP udp;
+    TaskHandle_t txTaskHandle;
 
-    static uint8_t blackhole[64];
 };

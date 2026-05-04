@@ -78,12 +78,12 @@ void XR18Client::synchronize() {
 void XR18Client::heartbeat() {
     {
         OSCMessage msg("/status");
-        send(msg, pdMS_TO_TICKS(1));
+        osc.send(msg, pdMS_TO_TICKS(1), 0);
     }
 
     {
         OSCMessage msg("/xremotenfb");
-        send(msg, pdMS_TO_TICKS(1));
+        osc.send(msg, pdMS_TO_TICKS(1), 0);
     }
 
     lastHeartbeat = millis();

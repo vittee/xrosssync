@@ -2,7 +2,7 @@
 #include "BufferPrint.h"
 
 namespace {
-    static constexpr int kMaxPacketSize = 256;
+    static constexpr int kMaxPacketSize = 512;
     static constexpr auto kLogTag = "Osc";
 
     struct RawOsc {
@@ -13,13 +13,14 @@ namespace {
     struct OutgoingOsc : RawOsc {
         IPAddress dst;
         uint16_t port;
+        uint8_t retries;
     };
 }
 
 Osc::Osc()
 {
-    rxQueue = xQueueCreate(32, sizeof(RawOsc));
-    txQueue = xQueueCreate(32, sizeof(OutgoingOsc));
+    rxQueue = xQueueCreate(128, sizeof(RawOsc));
+    txQueue = xQueueCreate(64, sizeof(OutgoingOsc));
 }
 
 Osc::~Osc() {
@@ -41,58 +42,51 @@ void Osc::start() {
 
     running = true;
 
+    udp.listen(0);
+    udp.onPacket([this](AsyncUDPPacket packet) {
+        onPacket(packet);
+    });
+
     xTaskCreatePinnedToCore([](void* inst) {
-        static_cast<Osc*>(inst)->run();
-    }, "osc_task", 8192, this, 3, &taskHandle, 1);
+        static_cast<Osc*>(inst)->txTask();
+    }, "osc_tx", 4096, this, 2, &txTaskHandle, 1);
 }
 
 void Osc::stop() {
     if (!running) return;
 
     running = false;
-    vTaskDelete(taskHandle);
+    udp.close();
+    vTaskDelete(txTaskHandle);
     vQueueDelete(rxQueue);
     vQueueDelete(txQueue);
 
-    taskHandle = 0;
+    txTaskHandle = nullptr;
 }
 
-void Osc::run() {
-    while (running) {
-        int cost = 1;
-
-        cost += receivePacket();
-        cost += sendPacket();
-
-        vTaskDelay(pdMS_TO_TICKS(cost * 2 + 1)); // yield
-    }
-}
-
-bool Osc::receivePacket() {
-    auto size = udp.parsePacket();
-    if (size <= 0) {
-        return false;
-    }
+void Osc::onPacket(AsyncUDPPacket& packet) {
+    size_t size = packet.length();
 
     if (size > kMaxPacketSize) {
         ESP_LOGW(kLogTag, "Discarding large packet (%d bytes)", size);
-        while (udp.available()) {
-            udp.read(blackhole, sizeof(blackhole));
-        }
-
-        return false;
+        return;
     }
 
     RawOsc raw{};
-    raw.size = udp.read(raw.data, size);
+    raw.size = size;
+    memcpy(raw.data, packet.data(), size);
 
-#ifdef XROSSSYNC_DEBUG
-        ESP_LOGD(kLogTag, "Receiving from: %s, size=%d", udp.remoteIP().toString().c_str(), raw.size);
-#endif
+    if (!xQueueSend(rxQueue, &raw, 0)) {
+        ESP_LOGW(kLogTag, "rxQueue full, packet dropped");
+    }
+}
 
-    xQueueSend(rxQueue, &raw, 0);
-
-    return true;
+void Osc::txTask() {
+    while (running) {
+        sendPacket();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    vTaskDelete(nullptr);
 }
 
 bool Osc::sendPacket() {
@@ -106,35 +100,26 @@ bool Osc::sendPacket() {
         return false;
     }
 
-#ifdef XROSSSYNC_DEBUG
-    ESP_LOGD(kLogTag, "Sending to: %s, size=%d", pkt.dst.toString().c_str(), pkt.size);
-#endif
+    size_t sent = udp.writeTo(pkt.data, pkt.size, pkt.dst, pkt.port);
 
-    bool sent = false;
-    if (udp.beginPacket(pkt.dst, port)) {
-        udp.write(pkt.data, pkt.size);
-        sent = udp.endPacket();
-    }
-
-    if (!sent) {
+    if (sent == 0 && pkt.retries > 0) {
+        pkt.retries--;
         xQueueSendToFront(txQueue, &pkt, 0);
     }
 
-#ifdef XROSSSYNC_DEBUG
-    ESP_LOGD(kLogTag, "-------- Sent(%d) --------", sent);
-#endif
-
-    return sent;
+    return sent > 0;
 }
 
-bool Osc::send(OSCMessage& msg, TickType_t timeout, IPAddress destination ) {
+bool Osc::send(OSCMessage& msg, TickType_t timeout, IPAddress destination, uint8_t retries) {
     if (msg.hasError()) {
         return false;
     }
 
-    OutgoingOsc pkt{};
-    pkt.dst = destination != INADDR_NONE ? destination : ipAddr;
-    pkt.port = port;
+    OutgoingOsc pkt{
+        .dst = destination != INADDR_NONE ? destination : ipAddr,
+        .port = port,
+        .retries = retries
+    };
 
     if (pkt.dst == INADDR_NONE) {
         return false;
@@ -157,4 +142,3 @@ bool Osc::receive(OSCMessage& msg, TickType_t timeout) {
     return !msg.hasError();
 }
 
-uint8_t Osc::blackhole[64]{};
