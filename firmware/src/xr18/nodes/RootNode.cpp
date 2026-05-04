@@ -34,7 +34,7 @@ RootNode::RootNode(Osc& osc)
     }
 
     m_buses.reserve(6);
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 6; i++) {
         m_buses.emplace_back(String(i + 1), &bus);
     }
 
