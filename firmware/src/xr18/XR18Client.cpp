@@ -73,6 +73,77 @@ void XR18Client::stopSearching() {
 }
 
 void XR18Client::synchronize() {
+    OSCMessage msg;
+
+    for (auto& ch : rootNode.channels()) {
+        msg.empty();
+        msg.setAddress(ch.config().getPath().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(ch.mix().getPath().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    {
+        auto aux = rootNode.aux();
+
+        msg.empty();
+        msg.setAddress(aux.config().getPath().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(aux.mix().getPath().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    for (auto& ch : rootNode.fxReturns()) {
+        msg.empty();
+        msg.setAddress(ch.config().getPath().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(ch.mix().getPath().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    for (auto& ch : rootNode.buses()) {
+        msg.empty();
+        msg.setAddress(ch.config().getPath().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(ch.mix().getPath().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    for (auto& ch : rootNode.fxSends()) {
+        msg.empty();
+        msg.setAddress(ch.config().getPath().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(ch.mix().getPath().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    for (auto& ch : rootNode.dcas()) {
+        msg.empty();
+        msg.setAddress(ch.config().getPath().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    {
+        msg.empty();
+        msg.setAddress(rootNode.state().solo().getPath().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    {
+        msg.empty();
+        msg.setAddress(rootNode.state().solosw().getPath().c_str());
+        send(msg, portMAX_DELAY);
+    }
 }
 
 void XR18Client::heartbeat() {
