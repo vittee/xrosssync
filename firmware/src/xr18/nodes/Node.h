@@ -43,8 +43,6 @@ public:
 
     void buildPath();
 protected:
-
-
     String m_name;
     NodeType m_type;
     //

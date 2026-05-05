@@ -9,6 +9,12 @@ void Param::onChange(std::function<void()> cb) {
     m_callbacks.push_back(std::move(cb));
 }
 
+void Param::notify() {
+    for (auto& cb : m_callbacks) {
+        cb();
+    }
+}
+
 void Param::valueChanged() {
     ESP_LOGD("Param", "Value changed");
 
@@ -22,9 +28,7 @@ void Param::valueChanged() {
         root->osc.send(msg, 0, 2);
     }
 
-    for (auto& cb : m_callbacks) {
-        cb();
-    }
+    notify();
 }
 
 } // namespace params

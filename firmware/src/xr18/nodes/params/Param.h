@@ -39,11 +39,14 @@ public:
     void onChange(std::function<void()> cb);
 
 protected:
+    void notify();
     void valueChanged();
 
     ParamType paramType;
 
 private:
+    friend class nodes::Node;
+
     std::vector<std::function<void()>> m_callbacks;
 };
 
