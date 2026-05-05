@@ -10,7 +10,9 @@ namespace xr18 {
 XR18Client::XR18Client()
     : m_rootNode(osc)
 {
-
+    for (auto& ch : m_rootNode.channels()) {
+        m_channelStrips.emplace_back(ChannelStrip::from(ch));
+    }
 }
 
 void XR18Client::start() {

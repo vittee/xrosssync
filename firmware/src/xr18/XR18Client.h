@@ -5,6 +5,7 @@
 
 #include "osc/Osc.h"
 #include "nodes/RootNode.h"
+#include "ChannelStrip.h"
 
 namespace xr18 {
 
@@ -32,6 +33,9 @@ public:
     void search();
 
     inline nodes::RootNode& rootNode() { return m_rootNode; }
+
+    inline ChannelStrip& channelStrip(ChannelStrip::StripIndex index);
+
 private:
     void task();
 
@@ -60,8 +64,13 @@ private:
     std::vector<MixerInfo> mixers{1};
 
     nodes::RootNode m_rootNode;
+    std::vector<ChannelStrip> m_channelStrips;
 
     Osc osc;
 };
+
+inline ChannelStrip& XR18Client::channelStrip(ChannelStrip::StripIndex index) {
+    return m_channelStrips[static_cast<uint8_t>(index)];
+}
 
 }
