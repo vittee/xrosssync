@@ -14,7 +14,7 @@ RootNode* Node::getRoot() {
         current = current->parent;
     }
 
-    if (current->type == NodeType::Root) {
+    if (current->m_type == NodeType::Root) {
         return static_cast<RootNode*>(current);
     }
 
@@ -25,47 +25,41 @@ void Node::buildPath() {
     String newPath("");
 
     if (parent != nullptr) {
-        newPath = parent->path;
+        newPath = parent->m_path;
     }
 
-    if (!name.isEmpty()) {
-        newPath += "/" + name;
+    if (!m_name.isEmpty()) {
+        newPath += "/" + m_name;
     }
 
-    path = newPath;
+    m_path = newPath;
 
-    for (auto* child : children) {
+    for (auto* child : m_children) {
         child->buildPath();
     }
 }
 
 bool Node::applyOsc(OSCMessage& msg, int) {
-    ESP_LOGD("Node", "Applying OSC children=%d, argc=%d", children.size(), msg.size());
-
-    if (children.size() == 0) {
+    if (m_children.size() == 0) {
         return false;
     }
 
     int argc = msg.size();
 
-    for (int i = 0; i < children.size(); i++) {
+    for (int i = 0; i < m_children.size(); i++) {
         if (i >= argc) {
             return false;
         }
 
-        Node* node = children.at(i);
+        Node* node = m_children.at(i);
 
-        ESP_LOGD("Node", "children(%d), path=%s, type=%d", i, node->path.c_str(), node->type);
-
-        if (node->type != NodeType::Params) {
+        if (node->m_type != NodeType::Params) {
             return false;
         }
 
         auto param = static_cast<params::Param*>(node);
 
         auto paramType = param->getParamType();
-
-        ESP_LOGD("Node", "param=%d, argType=%c", paramType, msg.getType(i));
 
         switch (msg.getType(i)) {
             case 'i':

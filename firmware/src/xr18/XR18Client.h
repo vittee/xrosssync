@@ -30,6 +30,8 @@ public:
     void start();
 
     void search();
+
+    inline nodes::RootNode& rootNode() { return m_rootNode; }
 private:
     void task();
 
@@ -57,7 +59,7 @@ private:
 
     std::vector<MixerInfo> mixers{1};
 
-    nodes::RootNode rootNode;
+    nodes::RootNode m_rootNode;
 
     Osc osc;
 };

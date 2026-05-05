@@ -16,7 +16,7 @@ public:
         :
         Node(name, parent)
     {
-        this->type = type;
+        this->m_type = type;
     }
 };
 
@@ -124,6 +124,7 @@ public:
         m_fader("fader", this, 1023),
         m_config(this)
     {
+        this->m_type = NodeType::DCA;
     }
 
     inline params::EnumParam& on() { return m_on; }

@@ -25,7 +25,7 @@ public:
     Param(String name, Node* parent)
         : Node(name, parent)
     {
-        type = NodeType::Params;
+        m_type = NodeType::Params;
     }
 
     ParamType getParamType() const { return paramType; }

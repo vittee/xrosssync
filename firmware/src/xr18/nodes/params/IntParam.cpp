@@ -25,13 +25,13 @@ bool IntParam::applyOsc(OSCMessage& msg, int index) {
 
     m_value = msg.getInt(index);
 
-    ESP_LOGD("Int Param", "Applying OSC [%s] %d", name.c_str(), m_value);
+    ESP_LOGD("Int Param", "Applying OSC [%s] %d", m_path.c_str(), m_value);
     return true;
 }
 
 void IntParam::buildOsc(OSCMessage& msg) {
     msg.empty();
-    msg.setAddress(path.c_str());
+    msg.setAddress(m_path.c_str());
     msg.set(0, m_value);
 }
 

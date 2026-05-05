@@ -15,6 +15,7 @@ enum class NodeType {
     Bus,
     FxSend,
     LR,
+    DCA,
     Nodes,
     Params
 };
@@ -24,16 +25,17 @@ class RootNode;
 class Node {
 public:
     Node(String name, Node* parent = nullptr)
-        : name(name), parent(parent)
+        : m_name(name), parent(parent)
     {
         if (parent) {
-            parent->children.emplace_back(this);
+            parent->m_children.emplace_back(this);
         }
     }
 
-    const std::vector<Node*>& getChildren() const { return children; }
-    const String& getName() const { return name; }
-    const String& getPath() const { return path; }
+    inline const std::vector<Node*>& children() const { return m_children; }
+    inline const String& name() const { return m_name; }
+    inline const NodeType type() const { return m_type; }
+    inline const String& path() const { return m_path; }
 
     RootNode* getRoot();
 
@@ -43,13 +45,13 @@ public:
 protected:
 
 
-    String name;
-    NodeType type;
+    String m_name;
+    NodeType m_type;
     //
     Node* parent = nullptr;
-    std::vector<Node*> children;
+    std::vector<Node*> m_children;
     //
-    String path;
+    String m_path;
 };
 
 } // namespace nodes

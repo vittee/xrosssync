@@ -14,13 +14,13 @@ bool StringParam::applyOsc(OSCMessage& msg, int index) {
 
     value = String(buf, length);
 
-    ESP_LOGD("String Param", "Applying OSC [%s] %s", name.c_str(), value.c_str());
+    ESP_LOGD("String Param", "Applying OSC [%s] %s", m_name.c_str(), value.c_str());
     return true;
 }
 
 void StringParam::buildOsc(OSCMessage& msg) {
     msg.empty();
-    msg.setAddress(path.c_str());
+    msg.setAddress(m_path.c_str());
     msg.set(0, value.c_str());
 }
 

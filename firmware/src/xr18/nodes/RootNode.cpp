@@ -19,7 +19,7 @@ RootNode::RootNode(Osc& osc)
     m_state(this),
     m_action(this)
 {
-    type = NodeType::Root;
+    m_type = NodeType::Root;
 
     m_channels.reserve(16);
     for (int i = 0; i < 16; i++) {
@@ -82,10 +82,10 @@ Node* RootNode::find(const char* path, int len) {
         }
 
         Node* found = nullptr;
-        for (auto node : current->getChildren()) {
-            // ESP_LOGD("find node", "node name: %s", node->getName().c_str());
+        for (auto node : current->children()) {
+            // ESP_LOGD("find node", "node name: %s", node->name().c_str());
 
-            if (node->getName() == segment) {
+            if (node->name() == segment) {
                 found = node;
                 break;
             }

@@ -10,7 +10,7 @@ public:
     Nodes(String name, Node* parent)
         : Node(name, parent)
     {
-        type = NodeType::Nodes;
+        m_type = NodeType::Nodes;
     }
 
 private:

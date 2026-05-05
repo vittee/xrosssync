@@ -16,13 +16,13 @@ bool FloatParam::applyOsc(OSCMessage& msg, int index) {
 
     m_value = v;
 
-    ESP_LOGD("FloatParam", "Applying OSC [%s] %d => ", name.c_str(), m_value, formatValue().c_str());
+    ESP_LOGD("FloatParam", "Applying OSC [%s] %d => %s", m_path.c_str(), m_value, formatValue().c_str());
     return true;
 }
 
 void FloatParam::buildOsc(OSCMessage& msg) {
     msg.empty();
-    msg.setAddress(path.c_str());
+    msg.setAddress(m_path.c_str());
     msg.set(0, (float)m_value / (float)m_max);
 }
 } // namespace params

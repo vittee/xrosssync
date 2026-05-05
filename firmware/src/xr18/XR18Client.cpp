@@ -8,7 +8,7 @@ namespace {
 namespace xr18 {
 
 XR18Client::XR18Client()
-    : rootNode(osc)
+    : m_rootNode(osc)
 {
 
 }
@@ -75,73 +75,73 @@ void XR18Client::stopSearching() {
 void XR18Client::synchronize() {
     OSCMessage msg;
 
-    for (auto& ch : rootNode.channels()) {
+    for (auto& ch : m_rootNode.channels()) {
         msg.empty();
-        msg.setAddress(ch.config().getPath().c_str());
+        msg.setAddress(ch.config().path().c_str());
         send(msg, portMAX_DELAY);
 
         msg.empty();
-        msg.setAddress(ch.mix().getPath().c_str());
-        send(msg, portMAX_DELAY);
-    }
-
-    {
-        auto aux = rootNode.aux();
-
-        msg.empty();
-        msg.setAddress(aux.config().getPath().c_str());
-        send(msg, portMAX_DELAY);
-
-        msg.empty();
-        msg.setAddress(aux.mix().getPath().c_str());
-        send(msg, portMAX_DELAY);
-    }
-
-    for (auto& ch : rootNode.fxReturns()) {
-        msg.empty();
-        msg.setAddress(ch.config().getPath().c_str());
-        send(msg, portMAX_DELAY);
-
-        msg.empty();
-        msg.setAddress(ch.mix().getPath().c_str());
-        send(msg, portMAX_DELAY);
-    }
-
-    for (auto& ch : rootNode.buses()) {
-        msg.empty();
-        msg.setAddress(ch.config().getPath().c_str());
-        send(msg, portMAX_DELAY);
-
-        msg.empty();
-        msg.setAddress(ch.mix().getPath().c_str());
-        send(msg, portMAX_DELAY);
-    }
-
-    for (auto& ch : rootNode.fxSends()) {
-        msg.empty();
-        msg.setAddress(ch.config().getPath().c_str());
-        send(msg, portMAX_DELAY);
-
-        msg.empty();
-        msg.setAddress(ch.mix().getPath().c_str());
-        send(msg, portMAX_DELAY);
-    }
-
-    for (auto& ch : rootNode.dcas()) {
-        msg.empty();
-        msg.setAddress(ch.config().getPath().c_str());
+        msg.setAddress(ch.mix().path().c_str());
         send(msg, portMAX_DELAY);
     }
 
     {
+        auto aux = m_rootNode.aux();
+
         msg.empty();
-        msg.setAddress(rootNode.state().solo().getPath().c_str());
+        msg.setAddress(aux.config().path().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(aux.mix().path().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    for (auto& ch : m_rootNode.fxReturns()) {
+        msg.empty();
+        msg.setAddress(ch.config().path().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(ch.mix().path().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    for (auto& ch : m_rootNode.buses()) {
+        msg.empty();
+        msg.setAddress(ch.config().path().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(ch.mix().path().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    for (auto& ch : m_rootNode.fxSends()) {
+        msg.empty();
+        msg.setAddress(ch.config().path().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(ch.mix().path().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    for (auto& ch : m_rootNode.dcas()) {
+        msg.empty();
+        msg.setAddress(ch.config().path().c_str());
         send(msg, portMAX_DELAY);
     }
 
     {
         msg.empty();
-        msg.setAddress(rootNode.state().solosw().getPath().c_str());
+        msg.setAddress(m_rootNode.state().solo().path().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    {
+        msg.empty();
+        msg.setAddress(m_rootNode.state().solosw().path().c_str());
         send(msg, portMAX_DELAY);
     }
 }
@@ -181,13 +181,10 @@ bool XR18Client::receive() {
         return true;
     }
 
-    auto node = rootNode.find(msg.getAddress(), msg.getAddressLength());
+    auto node = m_rootNode.find(msg.getAddress(), msg.getAddressLength());
 
     if (node) {
-        ESP_LOGD(kLogTag, "Found node: %s", node->getPath().c_str());
         node->applyOsc(msg);
-    } else {
-        ESP_LOGD(kLogTag, "Node not found for osc: %s", msg.getAddress());
     }
 
     return true;
@@ -201,8 +198,6 @@ void XR18Client::handleSTATUS(OSCMessage &msg) {
 
     msg.getString(1, ip, sizeof(ip));
     msg.getString(2, name, sizeof(name));
-
-    ESP_LOGD(kLogTag, "Got Status, connected=%d, searching=%d, ip=%s, name=%s", connected, searching, ip, name);
 #endif
 
     if (!searching && !connected) {
