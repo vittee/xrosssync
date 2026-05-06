@@ -10,8 +10,24 @@ namespace xr18 {
 XR18Client::XR18Client()
     : m_rootNode(osc)
 {
-    for (auto& ch : m_rootNode.channels()) {
-        m_channelStrips.emplace_back(ChannelStrip::from(ch));
+    // m_stripEventQueue = xQueueCreate(32, sizeof(ChannelStrip::Event));
+
+    m_channelStrips.reserve(static_cast<uint8_t>(ChannelStrip::StripIndex::MAX));
+
+    auto& channels = m_rootNode.channels();
+    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::Ch01); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::Ch16); i++) {
+        m_channelStrips.emplace_back(ChannelStrip::from(
+            channels[i],
+            m_rootNode.state().soloswAt(solowswIndices[i])
+        ));
+    }
+
+    for (int i = 0; i < (int)m_channelStrips.size(); i++) {
+        auto stripIndex = static_cast<ChannelStrip::StripIndex>(i);
+        m_channelStrips[i].onEvent([this, stripIndex](ChannelStrip::ParamId paramId, params::Param* p) {
+            // xQueueSend(m_stripEventQueue, &ev, 0);
+            ESP_LOGD("XR18Client", "Event from Strip(%d) paramId=%d value => %s", stripIndex, paramId, p->formatValue().c_str());
+        });
     }
 }
 

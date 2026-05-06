@@ -60,6 +60,11 @@ public:
     }
 
     inline params::EnumParam& solo() { return m_solo; }
+
+    inline params::EnumParam& soloswAt(uint8_t index) {
+        return *static_cast<params::EnumParam*>(m_solosw.children()[index]);
+    }
+
     inline std::vector<params::EnumParam>& soloswInputs() { return m_solosw_inputs; }
     inline params::EnumParam& solosw_aux() { return *m_solosw_aux; }
     inline std::vector<params::EnumParam>& soloswFxReturns() { return m_solosw_fxreturns; }

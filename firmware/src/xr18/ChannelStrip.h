@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include "nodes/Node.h"
 #include "nodes/channels/Channel.h"
 #include "nodes/params/StringParam.h"
@@ -22,9 +23,23 @@ public:
         FxSend1, FxSend2, FxSend3, FxSend4,
         DCA1, DCA2, DCA3, DCA4,
         LR,
+        MAX = LR + 1
     };
 
-    static ChannelStrip from(channels::InputChannel& ch);
+    enum class ParamId : uint8_t {
+        Name,
+        Color,
+        On,
+        Fader,
+        Pan,
+        Solosw,
+    };
+
+    typedef std::function<void(ParamId, params::Param*)> ChannelEventFn;
+
+    static ChannelStrip from(channels::InputChannel& ch, params::EnumParam& solosw);
+
+    void onEvent(ChannelEventFn cb);
 
     NodeType channelType() const { return m_type; }
 
@@ -33,6 +48,7 @@ public:
     params::EnumParam& on() { return *m_on; }
     params::FaderParam& fader() { return *m_fader; }
     params::LerpParam& pan() { return *m_pan; }
+    params::EnumParam& solosw() { return *m_solosw; }
 
 private:
     ChannelStrip(
@@ -41,7 +57,8 @@ private:
         params::IntParam& color,
         params::EnumParam& on,
         params::FaderParam& fader,
-        params::LerpParam& pan
+        params::LerpParam& pan,
+        params::EnumParam& solosw
     );
 
     NodeType m_type;
@@ -50,6 +67,18 @@ private:
     params::EnumParam* m_on;
     params::FaderParam* m_fader;
     params::LerpParam* m_pan;
+    params::EnumParam* m_solosw;
+    ChannelEventFn m_eventCallback;
+};
+
+static constexpr uint8_t solowswIndices[(uint8_t)ChannelStrip::StripIndex::MAX] = {
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,  // Ch01-16 → solosw 01-16
+    16,                                                    // AuxReturn → solosw 17
+    17, 18, 19, 20,                                        // FxReturn1-4 → solosw 18-21
+    39, 40, 41, 42, 43, 44,                                // Bus1-6 → solosw 40-45
+    45, 46, 47, 48,                                        // FxSend1-4 → solosw 46-49
+    50, 51, 52, 53,                                        // DCA1-4 → solosw 51-54
+    49                                                     // LR → solosw 50
 };
 
 } // namespace xr18
