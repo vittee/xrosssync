@@ -40,10 +40,30 @@ bool App::init() {
 #ifdef XROSSSYNC_DEBUG
     udpPrint.setDestination(WiFi.broadcastIP(), 5005);
 
-    esp_log_set_vprintf([](const char *format, va_list args) -> int {
-        char buffer[512];
-        int len = vsnprintf(buffer, sizeof(buffer), format, args);
-        return len > 0 ? udpPrint.print(buffer) : 0;
+    struct LogMessage {
+        char buf[256];
+    };
+
+    static QueueHandle_t logQueue = xQueueCreate(16, sizeof(LogMessage));
+
+    xTaskCreatePinnedToCore([](void*) {
+        LogMessage msg;
+        for (;;) {
+            if (xQueueReceive(logQueue, &msg, portMAX_DELAY)) {
+                udpPrint.print(msg.buf);
+            }
+        }
+    }, "log_task", 4096, nullptr, 1, nullptr, 0);
+
+    esp_log_set_vprintf([](const char* fmt, va_list args) -> int {
+        if (!logQueue) {
+            return 0;
+        }
+
+        LogMessage msg;
+        int len = vsnprintf(msg.buf, sizeof(msg.buf), fmt, args);
+        xQueueSend(logQueue, &msg, 0);
+        return len;
     });
 #endif
 
