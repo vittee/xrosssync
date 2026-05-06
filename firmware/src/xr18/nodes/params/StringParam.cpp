@@ -12,16 +12,17 @@ bool StringParam::applyOsc(OSCMessage& msg, int index) {
     char buf[256];
     int length = msg.getString(index, buf, sizeof(buf));
 
-    value = String(buf, length);
+    m_value = String(buf, length);
 
     ESP_LOGD("String Param", "Applying OSC [%s] %s", m_name.c_str(), value.c_str());
+    notify();
     return true;
 }
 
 void StringParam::buildOsc(OSCMessage& msg) {
     msg.empty();
     msg.setAddress(m_path.c_str());
-    msg.set(0, value.c_str());
+    msg.set(0, m_value.c_str());
 }
 
 } // namespace params

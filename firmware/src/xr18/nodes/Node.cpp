@@ -85,9 +85,7 @@ bool Node::applyOsc(OSCMessage& msg, int) {
 
         }
 
-        if (param->applyOsc(msg, i)) {
-            param->notify();
-        }
+        param->applyOsc(msg, i);
     }
 
     return true;

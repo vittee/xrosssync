@@ -18,9 +18,9 @@ public:
 
     virtual void buildOsc(OSCMessage& msg) override;
 
-    virtual String formatValue() const override { return value; }
+    virtual String formatValue() const override { return m_value; }
 private:
-    String value;
+    String m_value;
 };
 
 } // namespace params

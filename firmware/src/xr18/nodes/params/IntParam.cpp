@@ -26,6 +26,7 @@ bool IntParam::applyOsc(OSCMessage& msg, int index) {
     m_value = msg.getInt(index);
 
     ESP_LOGD("Int Param", "Applying OSC [%s] %d", m_path.c_str(), m_value);
+    notify();
     return true;
 }
 
