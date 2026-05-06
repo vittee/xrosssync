@@ -38,6 +38,11 @@ public:
     typedef std::function<void(ParamId, params::Param*)> ChannelEventFn;
 
     static ChannelStrip from(channels::InputChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip from(channels::ReturnChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip from(channels::BusChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip from(channels::FxSendChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip from(channels::DCAChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip from(channels::MainChannel& ch, params::EnumParam& solosw);
 
     void onEvent(ChannelEventFn cb);
 
@@ -47,6 +52,7 @@ public:
     params::IntParam& color() { return *m_color; }
     params::EnumParam& on() { return *m_on; }
     params::FaderParam& fader() { return *m_fader; }
+    bool hasPan() const { return m_pan != nullptr; }
     params::LerpParam& pan() { return *m_pan; }
     params::EnumParam& solosw() { return *m_solosw; }
 
@@ -57,7 +63,7 @@ private:
         params::IntParam& color,
         params::EnumParam& on,
         params::FaderParam& fader,
-        params::LerpParam& pan,
+        params::LerpParam* pan,
         params::EnumParam& solosw
     );
 

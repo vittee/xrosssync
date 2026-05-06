@@ -12,14 +12,63 @@ XR18Client::XR18Client()
 {
     m_channelStrips.reserve(static_cast<uint8_t>(ChannelStrip::StripIndex::MAX));
 
-    auto& channels = m_rootNode.channels();
+    auto& state = m_rootNode.state();
+
+    auto& inputs = m_rootNode.channels();
     for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::Ch01); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::Ch16); i++) {
         m_channelStrips.emplace_back(ChannelStrip::from(
-            channels[i],
-            m_rootNode.state().soloswAt(solowswIndices[i])
+            inputs[i],
+            state.soloswAt(solowswIndices[i])
         ));
     }
 
+    {
+        m_channelStrips.emplace_back(ChannelStrip::from(
+            m_rootNode.aux(),
+            state.soloswAt(solowswIndices[static_cast<uint8_t>(ChannelStrip::StripIndex::AuxReturn)])
+        ));
+    }
+
+    auto& fxReturns = m_rootNode.fxReturns();
+    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::FxReturn1); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::FxReturn4); i++) {
+        m_channelStrips.emplace_back(ChannelStrip::from(
+            fxReturns[i - static_cast<uint8_t>(ChannelStrip::StripIndex::FxReturn1)],
+            state.soloswAt(solowswIndices[i])
+        ));
+    }
+
+    auto& buses = m_rootNode.buses();
+    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::Bus1); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::Bus6); i++) {
+        m_channelStrips.emplace_back(ChannelStrip::from(
+            buses[i - static_cast<uint8_t>(ChannelStrip::StripIndex::Bus1)],
+            state.soloswAt(solowswIndices[i])
+        ));
+    }
+
+    auto& fxSends = m_rootNode.fxSends();
+    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::FxSend1); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::FxSend4); i++) {
+        m_channelStrips.emplace_back(ChannelStrip::from(
+            fxSends[i - static_cast<uint8_t>(ChannelStrip::StripIndex::FxSend1)],
+            state.soloswAt(solowswIndices[i])
+        ));
+    }
+
+    auto& dcas = m_rootNode.dcas();
+    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::DCA1); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::DCA4); i++) {
+        m_channelStrips.emplace_back(ChannelStrip::from(
+            dcas[i - static_cast<uint8_t>(ChannelStrip::StripIndex::DCA1)],
+            state.soloswAt(solowswIndices[i])
+        ));
+    }
+
+    {
+        m_channelStrips.emplace_back(ChannelStrip::from(
+            m_rootNode.lr(),
+            state.soloswAt(solowswIndices[static_cast<uint8_t>(ChannelStrip::StripIndex::LR)])
+        ));
+    }
+
+    // register event handler for each strip
     for (int i = 0; i < (int)m_channelStrips.size(); i++) {
         auto stripIndex = static_cast<ChannelStrip::StripIndex>(i);
         m_channelStrips[i].onEvent([this, stripIndex](ChannelStrip::ParamId paramId, params::Param* p) {

@@ -8,7 +8,7 @@ ChannelStrip::ChannelStrip(
     params::IntParam& color,
     params::EnumParam& on,
     params::FaderParam& fader,
-    params::LerpParam& pan,
+    params::LerpParam* pan,
     params::EnumParam& solosw
 ) :
     m_type(type),
@@ -16,7 +16,7 @@ ChannelStrip::ChannelStrip(
     m_color(&color),
     m_on(&on),
     m_fader(&fader),
-    m_pan(&pan),
+    m_pan(pan),
     m_solosw(&solosw)
 {
 
@@ -41,9 +41,11 @@ void ChannelStrip::onEvent(ChannelEventFn cb) {
         m_eventCallback(ParamId::Fader, m_fader);
     });
 
-    m_pan->onChange([this]() {
-        m_eventCallback(ParamId::Pan, m_pan);
-    });
+    if (m_pan) {
+        m_pan->onChange([this]() {
+            m_eventCallback(ParamId::Pan, m_pan);
+        });
+    }
 
     m_solosw->onChange([this]() {
         m_eventCallback(ParamId::Solosw, m_solosw);
@@ -58,7 +60,67 @@ ChannelStrip ChannelStrip::from(channels::InputChannel& ch, params::EnumParam& s
         ch.config().color(),
         ch.mix().on(),
         ch.mix().fader(),
-        ch.mix().pan(),
+        &ch.mix().pan(),
+        solosw
+    );
+}
+
+ChannelStrip ChannelStrip::from(channels::ReturnChannel& ch, params::EnumParam& solosw) {
+    return ChannelStrip(
+        NodeType::Return,
+        ch.config().name(),
+        ch.config().color(),
+        ch.mix().on(),
+        ch.mix().fader(),
+        &ch.mix().pan(),
+        solosw
+    );
+}
+
+ChannelStrip ChannelStrip::from(channels::BusChannel& ch, params::EnumParam& solosw) {
+    return ChannelStrip(
+        NodeType::Bus,
+        ch.config().name(),
+        ch.config().color(),
+        ch.mix().on(),
+        ch.mix().fader(),
+        &ch.mix().pan(),
+        solosw
+    );
+}
+
+ChannelStrip ChannelStrip::from(channels::FxSendChannel& ch, params::EnumParam& solosw) {
+    return ChannelStrip(
+        NodeType::FxSend,
+        ch.config().name(),
+        ch.config().color(),
+        ch.mix().on(),
+        ch.mix().fader(),
+        nullptr,
+        solosw
+    );
+}
+
+ChannelStrip ChannelStrip::from(channels::DCAChannel& ch, params::EnumParam& solosw) {
+    return ChannelStrip(
+        NodeType::DCA,
+        ch.config().name(),
+        ch.config().color(),
+        ch.on(),
+        ch.fader(),
+        nullptr,
+        solosw
+    );
+}
+
+ChannelStrip ChannelStrip::from(channels::MainChannel& ch, params::EnumParam& solosw) {
+    return ChannelStrip(
+        NodeType::LR,
+        ch.config().name(),
+        ch.config().color(),
+        ch.mix().on(),
+        ch.mix().fader(),
+        &ch.mix().pan(),
         solosw
     );
 }
