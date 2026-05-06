@@ -4,7 +4,7 @@ void UDPPrint::setDestination(IPAddress ip, uint16_t port) {
     m_ip = ip;
     m_port = port;
 
-    m_queue = xQueueCreate(128, sizeof(LogPacket));
+    m_queue = xQueueCreate(32, sizeof(LogPacket));
 
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<UDPPrint*>(inst)->senderTask();
