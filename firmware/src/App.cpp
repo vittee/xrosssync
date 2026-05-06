@@ -75,6 +75,34 @@ bool App::init() {
         static_cast<App*>(inst)->handleInput();
     }, "input_handler_task", 8192, this, 1, nullptr, 1);
 
+    client.onEvent([this](const xr18::XR18Client::Event& e) {
+        switch (e.type) {
+            case xr18::XR18Client::Event::Type::SearchStarted:
+                ESP_LOGI(kLogTag, "Searching for mixer...");
+                break;
+
+            case xr18::XR18Client::Event::Type::SearchStopped:
+                ESP_LOGI(kLogTag, "Search stopped, mixers found: %d", client.mixers().size());
+                break;
+
+            case xr18::XR18Client::Event::Type::Connected:
+                ESP_LOGI(kLogTag, "Connected to %s (%s)", e.info.mixer->name.c_str(), e.info.mixer->ip.toString().c_str());
+                break;
+
+            case xr18::XR18Client::Event::Type::Disconnected:
+                ESP_LOGI(kLogTag, "Disconnected");
+                break;
+
+            case xr18::XR18Client::Event::Type::Synchronized:
+                ESP_LOGI(kLogTag, "Synchronized");
+                break;
+
+            case xr18::XR18Client::Event::Type::StripChanged:
+                ESP_LOGI(kLogTag, "Strip[%d] param=%d value=%s", e.strip.index, e.strip.paramId, e.strip.param->formatValue().c_str());
+                break;
+        }
+    });
+
     client.start();
     client.search();
 
