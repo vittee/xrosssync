@@ -114,9 +114,12 @@ void XR18Client::task() {
 
         if ((now - lastVitalSign) >= 10e3) {
             lastVitalSign = now;
-            connected = false;
-            if (m_eventCallback) {
-                m_eventCallback(Event::disconnected());
+
+            if (connected) {
+                connected = false;
+                if (m_eventCallback) {
+                    m_eventCallback(Event::disconnected());
+                }
             }
         }
 
