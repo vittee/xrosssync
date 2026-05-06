@@ -293,9 +293,11 @@ void XR18Client::handleSTATUS(OSCMessage &msg) {
 
     if (!searching && !connected) {
         connected = true;
+
         if (m_eventCallback) {
             m_eventCallback(Event::connected(m_mixers.front()));
         }
+
         synchronize();
     }
 }
