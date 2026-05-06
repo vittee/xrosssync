@@ -16,7 +16,6 @@ bool FloatParam::applyOsc(OSCMessage& msg, int index) {
 
     m_value = v;
 
-    ESP_LOGD("FloatParam", "Applying OSC [%s] %d => %s", m_path.c_str(), m_value, formatValue().c_str());
     notify();
     return true;
 }

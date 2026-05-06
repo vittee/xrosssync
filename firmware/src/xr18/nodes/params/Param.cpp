@@ -6,7 +6,7 @@ namespace nodes {
 namespace params {
 
 void Param::onChange(std::function<void()> cb) {
-    m_callbacks.push_back(std::move(cb));
+    m_callbacks.push_back(cb);
 }
 
 void Param::notify() {

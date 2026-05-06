@@ -45,8 +45,6 @@ protected:
     ParamType paramType;
 
 private:
-    friend class nodes::Node;
-
     std::vector<std::function<void()>> m_callbacks;
 };
 

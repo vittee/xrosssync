@@ -14,7 +14,6 @@ bool StringParam::applyOsc(OSCMessage& msg, int index) {
 
     m_value = String(buf, length);
 
-    ESP_LOGD("String Param", "Applying OSC [%s] %s", m_name.c_str(), value.c_str());
     notify();
     return true;
 }
