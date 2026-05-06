@@ -10,8 +10,6 @@ namespace xr18 {
 XR18Client::XR18Client()
     : m_rootNode(osc)
 {
-    // m_stripEventQueue = xQueueCreate(32, sizeof(ChannelStrip::Event));
-
     m_channelStrips.reserve(static_cast<uint8_t>(ChannelStrip::StripIndex::MAX));
 
     auto& channels = m_rootNode.channels();
@@ -25,8 +23,9 @@ XR18Client::XR18Client()
     for (int i = 0; i < (int)m_channelStrips.size(); i++) {
         auto stripIndex = static_cast<ChannelStrip::StripIndex>(i);
         m_channelStrips[i].onEvent([this, stripIndex](ChannelStrip::ParamId paramId, params::Param* p) {
-            // xQueueSend(m_stripEventQueue, &ev, 0);
-            ESP_LOGD("XR18Client", "Event from Strip(%d) paramId=%d value => %s", stripIndex, paramId, p->formatValue().c_str());
+            if (m_eventCallback) {
+                m_eventCallback(Event::stripChanged(stripIndex, paramId, p));
+            }
         });
     }
 }
@@ -46,7 +45,12 @@ void XR18Client::start() {
 void XR18Client::search() {
     searchStartTime = millis();
     searching = true;
-    mixers.clear();
+    m_mixers.clear();
+
+    if (m_eventCallback) {
+        m_eventCallback(Event::searchStarted());
+    }
+
     OSCMessage msg("/xinfo");
     osc.send(msg, 0, WiFi.broadcastIP());
 }
@@ -62,6 +66,9 @@ void XR18Client::task() {
         if ((now - lastVitalSign) >= 10e3) {
             lastVitalSign = now;
             connected = false;
+            if (m_eventCallback) {
+                m_eventCallback(Event::disconnected());
+            }
         }
 
         receive();
@@ -81,10 +88,20 @@ void XR18Client::task() {
 }
 
 void XR18Client::stopSearching() {
-    ESP_LOGD(kLogTag, "Autoconnect connected=%d, ip=%s, mixers found=%d", connected, osc.getAddress().toString().c_str(), mixers.size());
-    if (!connected && mixers.size() > 0) {
+    ESP_LOGD(kLogTag, "Autoconnect connected=%d, ip=%s, mixers found=%d", connected, osc.getAddress().toString().c_str(), m_mixers.size());
+
+    if (m_eventCallback) {
+        m_eventCallback(Event::searchStopped(m_mixers.size()));
+    }
+
+    if (!connected && m_mixers.size() > 0) {
         connected = true;
-        setAddress(mixers.front().ip);
+        setAddress(m_mixers.front().ip);
+
+        if (m_eventCallback) {
+            m_eventCallback(Event::connected(m_mixers.front()));
+        }
+
         heartbeat();
         synchronize();
     }
@@ -162,6 +179,10 @@ void XR18Client::synchronize() {
         msg.setAddress(m_rootNode.state().solosw().path().c_str());
         send(msg, portMAX_DELAY);
     }
+
+    if (m_eventCallback) {
+        m_eventCallback(Event::synchronized());
+    }
 }
 
 void XR18Client::heartbeat() {
@@ -220,6 +241,9 @@ void XR18Client::handleSTATUS(OSCMessage &msg) {
 
     if (!searching && !connected) {
         connected = true;
+        if (m_eventCallback) {
+            m_eventCallback(Event::connected(m_mixers.front()));
+        }
         synchronize();
     }
 }
@@ -242,12 +266,12 @@ void XR18Client::handleXINFO(OSCMessage &msg) {
         .version = version
     };
 
-    auto it = std::find_if(mixers.begin(), mixers.end(), [&](const MixerInfo& m) {
+    auto it = std::find_if(m_mixers.begin(), m_mixers.end(), [&](const MixerInfo& m) {
         return m.ip == info.ip;
     });
 
-    if (it == mixers.end()) {
-        mixers.emplace_back(info);
+    if (it == m_mixers.end()) {
+        m_mixers.emplace_back(info);
     }
 }
 
