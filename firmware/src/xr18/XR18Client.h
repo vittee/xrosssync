@@ -40,43 +40,41 @@ public:
 
             struct {
                 ChannelStrip::StripIndex index;
-                ChannelStrip::ParamId param;
-                nodes::params::Param *ptr;
+                ChannelStrip::ParamId paramId;
+                nodes::params::Param *param;
             } strip;
-
-            struct {
-                uint8_t mixersFound;
-            } search;
         };
 
     private:
         friend class XR18Client;
 
-        static Event searchStarted() { return { Type::SearchStarted }; }
+        static Event searchStarted() { return { .type = Type::SearchStarted }; }
 
         static Event searchStopped(uint8_t mixersFound) {
-            Event e;
-            e.type = Type::SearchStopped;
-            e.search = { mixersFound };
-            return e;
+            return { .type = Type::SearchStopped };
         }
 
         static Event connected(const MixerInfo &m) {
-            Event e;
-            e.type = Type::Connected;
-            e.info = {&m};
-            return e;
+            return {
+                .type = Type::Connected,
+                .info = {&m}
+            };
         }
 
         static Event disconnected() { return { Type::Disconnected }; }
 
         static Event synchronized() { return { Type::Synchronized }; }
 
-        static Event stripChanged(ChannelStrip::StripIndex s, ChannelStrip::ParamId p, nodes::params::Param *ptr) {
+        static Event stripChanged(ChannelStrip::StripIndex index, ChannelStrip::ParamId paramId, nodes::params::Param *param) {
             Event e;
-            e.type = Type::StripChanged;
-            e.strip = {s, p, ptr};
-            return e;
+            return {
+                .type = Type::StripChanged,
+                .strip = {
+                    .index = index,
+                    .paramId = paramId,
+                    .param = param
+                }
+            };
         }
     };
 
