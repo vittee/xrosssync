@@ -15,14 +15,14 @@ public:
     void setDestination(IPAddress ip, uint16_t port);
 
 private:
+    static constexpr size_t kBufSize = 256;
+
     struct LogPacket {
-        uint8_t data[512];
+        uint8_t data[kBufSize];
         size_t len;
     };
 
     void senderTask();
-
-    static constexpr size_t kBufSize = 512;
 
     AsyncUDP m_udp;
     IPAddress m_ip = INADDR_NONE;

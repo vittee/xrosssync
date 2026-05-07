@@ -44,7 +44,7 @@ bool App::init() {
         char buf[256];
     };
 
-    static QueueHandle_t logQueue = xQueueCreate(16, sizeof(LogMessage));
+    static QueueHandle_t logQueue = xQueueCreate(8, sizeof(LogMessage));
 
     xTaskCreatePinnedToCore([](void*) {
         LogMessage msg;
@@ -53,7 +53,7 @@ bool App::init() {
                 udpPrint.print(msg.buf);
             }
         }
-    }, "log_task", 4096, nullptr, 1, nullptr, 0);
+    }, "log_task", 2048, nullptr, 1, nullptr, 0);
 
     esp_log_set_vprintf([](const char* fmt, va_list args) -> int {
         if (!logQueue) {
