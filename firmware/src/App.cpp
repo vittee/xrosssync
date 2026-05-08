@@ -18,6 +18,7 @@ bool App::init() {
         return false;
     }
 
+    delay(100);
     display.setRotation(0);
     display.setBrightness(255);
 
