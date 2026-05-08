@@ -16,6 +16,10 @@ public:
     int16_t w() const { return m_w; }
     int16_t h() const { return m_h; }
 
+    void setPosition(int16_t x, int16_t y);
+    void setSize(int16_t w, int16_t h);
+    void setBoundBox(int16_t x, int16_t y, int16_t w, int16_t h);
+
     virtual bool isDirty() const { return m_dirty; }
     void invalidate();
 
