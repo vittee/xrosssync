@@ -1,6 +1,6 @@
-#include "App.h"
-
 #include <WiFi.h>
+#include "App.h"
+#include "screens/SplashScreen.h"
 
 namespace {
     static constexpr auto kLogTag = "App";
@@ -90,6 +90,10 @@ bool App::init() {
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<App*>(inst)->handleInput();
     }, "input_handler_task", 8192, this, 1, nullptr, 1);
+
+    display.fillScreen(TFT_BLACK);
+
+    m_screen = new SplashScreen(display.width(), display.height());
 
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<App*>(inst)->uiTask();
