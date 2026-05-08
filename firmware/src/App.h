@@ -113,10 +113,10 @@ private:
     void setScreen(ui::Screen* screen);
     void postAppEvent(AppEvent event);
 
-    AppState stateInit(bool transited);
-    AppState stateNormal(bool transited);
-    AppState stateSelectMixer(bool transited);
-    AppState stateWifiConfig(bool transited);
+    AppState stateInit(bool transited, TickType_t& delay);
+    AppState stateNormal(bool transited, TickType_t& delay);
+    AppState stateSelectMixer(bool transited, TickType_t& delay);
+    AppState stateWifiConfig(bool transited, TickType_t& delay);
 
     Display display;
     ui::Screen* m_screen = nullptr;
@@ -143,4 +143,6 @@ private:
     static constexpr uint8_t PIN_BUTTON_2 = 14;
 
     static constexpr uint8_t PIN_TOUCH_INT = 16;
+
+    static constexpr auto kLogTag = "App";
 };

@@ -3,10 +3,6 @@
 #include "screens/SplashScreen.h"
 #include "screens/MainScreen.h"
 
-namespace {
-    static constexpr auto kLogTag = "App";
-}
-
 App::App() {
 
 }
@@ -149,108 +145,25 @@ void App::appTask() {
         bool transited = (curr != prev);
         prev = curr;
 
+        TickType_t delay = pdMS_TO_TICKS(100);
+
         switch (curr) {
             case AppState::Init:
-                curr = stateInit(transited);
+                curr = stateInit(transited, delay);
                 break;
             case AppState::Normal:
-                curr = stateNormal(transited);
+                curr = stateNormal(transited, delay);
                 break;
             case AppState::SelectMixer:
-                curr = stateSelectMixer(transited);
+                curr = stateSelectMixer(transited, delay);
                 break;
             case AppState::WifiConfig:
-                curr = stateWifiConfig(transited);
+                curr = stateWifiConfig(transited, delay);
                 break;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(delay);
     }
 }
 
-App::AppState App::stateInit(bool transited) {
-    static constexpr uint32_t kSplashMs = 2000;
-    static TickType_t startTime = 0;
-
-    if (transited) {
-        startTime = xTaskGetTickCount();
-    }
-
-    if (xTaskGetTickCount() - startTime >= pdMS_TO_TICKS(kSplashMs)) {
-        return AppState::Normal;
-    }
-
-    return AppState::Init;
-}
-
-App::AppState App::stateNormal(bool transited) {
-    static constexpr uint8_t kMaxWifiFailures = 5;
-    static uint8_t wifiFailures = 0;
-    static bool clientStarted = false;
-
-    if (transited) {
-        wifiFailures = 0;
-        clientStarted = false;
-
-#ifdef XROSSSYNC_DEBUG
-        udpPrint.startLogging(WiFi.broadcastIP(), 5005);
-#endif
-
-        display.fillScreen(TFT_BLACK);
-        setScreen(new MainScreen(display.width(), display.height()));
-        delete m_splashScreen;
-        m_splashScreen = nullptr;
-    }
-
-    AppEvent event;
-    while (xQueueReceive(m_appEventQueue, &event, 0) == pdTRUE) {
-        switch (event.type) {
-            case AppEventType::WiFiConnected:
-                wifiFailures = 0;
-                if (!clientStarted) {
-                    clientStarted = true;
-                    client.start();
-                    client.search();
-                }
-                break;
-
-            case AppEventType::WiFiDisconnected:
-                wifiFailures++;
-                if (wifiFailures >= kMaxWifiFailures) {
-                    return AppState::WifiConfig;
-                }
-                WiFi.reconnect();
-                break;
-
-            case AppEventType::MixersFound:
-                if (client.mixers().size() > 1) {
-                    return AppState::SelectMixer;
-                }
-                break;
-        }
-    }
-
-    return AppState::Normal;
-}
-
-App::AppState App::stateSelectMixer(bool transited) {
-    if (transited) {
-        // TODO: setScreen(new MixerSelectionScreen(...))
-        ESP_LOGI(kLogTag, "SelectMixer state — screen not yet implemented");
-    }
-
-    return AppState::SelectMixer;
-}
-
-App::AppState App::stateWifiConfig(bool transited) {
-    if (transited) {
-        WiFi.mode(WIFI_AP);
-        WiFi.softAP("XRossSync");
-        // TODO: setScreen(new NoWiFiScreen(...))
-        ESP_LOGI(kLogTag, "WifiConfig state — AP: %s", WiFi.softAPIP().toString().c_str());
-    }
-
-    return AppState::WifiConfig;
-}
-
-
+// State implementations → App_States.cpp
