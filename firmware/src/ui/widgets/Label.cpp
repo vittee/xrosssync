@@ -40,12 +40,12 @@ void Label::setVAlign(VAlign align) {
     invalidate();
 }
 
-void Label::setTextColor(uint32_t color) {
+void Label::setTextColor(int32_t color) {
     m_textColor = color;
     invalidate();
 }
 
-void Label::setBackgroundColor(uint32_t color) {
+void Label::setBackgroundColor(int32_t color) {
     m_bgColor = color;
     invalidate();
 }

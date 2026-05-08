@@ -30,8 +30,8 @@ public:
     void setFont(const lgfx::IFont* font);
     void setHAlign(HAlign align);
     void setVAlign(VAlign align);
-    void setTextColor(uint32_t color);
-    void setBackgroundColor(uint32_t color);
+    void setTextColor(int32_t color);
+    void setBackgroundColor(int32_t color);
     void setPaletteColor(uint8_t index, lgfx::rgb565_t color);
 
 protected:
@@ -45,8 +45,8 @@ private:
     const lgfx::IFont* m_font;
     HAlign m_hAlign = HAlign::Left;
     VAlign m_vAlign = VAlign::Top;
-    uint32_t m_textColor = TFT_WHITE;
-    uint32_t m_bgColor = TFT_BLACK;
+    int32_t m_textColor = TFT_WHITE;
+    int32_t m_bgColor = TFT_BLACK;
 };
 
 } // namespace widgets
