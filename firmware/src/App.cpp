@@ -91,6 +91,10 @@ bool App::init() {
         static_cast<App*>(inst)->handleInput();
     }, "input_handler_task", 8192, this, 1, nullptr, 1);
 
+    xTaskCreatePinnedToCore([](void* inst) {
+        static_cast<App*>(inst)->uiTask();
+    }, "ui_task", 4096, this, 1, nullptr, 0);
+
     client.onEvent([this](const xr18::XR18Client::Event& e) {
         switch (e.type) {
             case xr18::XR18Client::Event::Type::SearchStarted:
@@ -123,6 +127,24 @@ bool App::init() {
     client.search();
 
     return true;
+}
+
+void App::setScreen(ui::Screen* screen) {
+    m_pendingScreen.store(screen);
+}
+
+void App::uiTask() {
+    for (;;) {
+        if (auto* pending = m_pendingScreen.exchange(nullptr)) {
+            m_screen = pending;
+        }
+
+        if (m_screen) {
+            m_screen->render(display);
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(1000/30)); // 30fps
+    }
 }
 
 App::Display::Display() {

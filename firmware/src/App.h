@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <Arduino.h>
 #include <LovyanGFX.hpp>
 
@@ -8,6 +9,7 @@
 #endif
 
 #include "xr18/XR18Client.h"
+#include "ui/Screen.h"
 
 class App {
 public:
@@ -89,8 +91,12 @@ private:
     static void touchISR(void* arg);
 
     void handleInput();
+    void uiTask();
+    void setScreen(ui::Screen* screen);
 
     Display display;
+    ui::Screen* m_screen = nullptr;
+    std::atomic<ui::Screen*> m_pendingScreen{nullptr};
 
     QueueHandle_t buttonEventQueue;
     button_isr_t buttons[2]{
