@@ -36,7 +36,6 @@ bool App::init() {
         delay(100);
     }
 
-
 #ifdef XROSSSYNC_DEBUG
     udpPrint.setDestination(WiFi.broadcastIP(), 5005);
 
@@ -66,10 +65,6 @@ bool App::init() {
         return len;
     });
 #endif
-
-    display.fillScreen(TFT_BLACK);
-    display.setCursor(0, 0);
-    display.println("IP: " + WiFi.localIP().toString());
 
     buttonEventQueue = xQueueCreate(32, sizeof(ButtonEvent));
 

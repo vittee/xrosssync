@@ -24,7 +24,11 @@ public:
 protected:
     void clearDirty() { m_dirty = false; }
 
-    int16_t m_x, m_y, m_w, m_h;
+    int16_t m_x;
+    int16_t m_y;
+    int16_t m_w;
+    int16_t m_h;
+
     bool m_dirty = true;
 };
 
