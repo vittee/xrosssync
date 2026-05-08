@@ -1,6 +1,7 @@
 #include <WiFi.h>
 #include "App.h"
 #include "screens/SplashScreen.h"
+#include "screens/MainScreen.h"
 
 namespace {
     static constexpr auto kLogTag = "App";
@@ -23,81 +24,65 @@ bool App::init() {
     display.setBrightness(255);
 
     display.selfTest();
-
     display.fillScreen(TFT_BLACK);
-    display.setFont(&fonts::Font2);
-    display.setTextColor(TFT_WHITE, 0);
 
     WiFi.mode(WIFI_STA);
     WiFi.begin();
 
-    display.print("Connecting to WiFi ..");
-    while (WiFi.status() != WL_CONNECTED) {
-        display.print('.');
-        delay(100);
+    {
+        buttonEventQueue = xQueueCreate(32, sizeof(ButtonEvent));
+
+        xTaskCreatePinnedToCore([](void* inst) {
+            static_cast<App*>(inst)->buttonTask();
+        }, "button_task", 8192, this, 2, nullptr, 1);
     }
 
-#ifdef XROSSSYNC_DEBUG
-    udpPrint.setDestination(WiFi.broadcastIP(), 5005);
+    {
+        pinMode(PIN_BUTTON_1, INPUT_PULLUP);
+        pinMode(PIN_BUTTON_2, INPUT_PULLUP);
 
-    struct LogMessage {
-        char buf[256];
-    };
+        attachInterruptArg(buttons[0].pin, buttonISR, (void*)&buttons[0], CHANGE);
+        attachInterruptArg(buttons[1].pin, buttonISR, (void*)&buttons[1], CHANGE);
+    }
 
-    static QueueHandle_t logQueue = xQueueCreate(8, sizeof(LogMessage));
+    {
+        xTaskCreatePinnedToCore([](void* inst) {
+            static_cast<App*>(inst)->touchTask();
+        }, "touch_task", 8192, this, 2, &touchTaskHandle, 1);
 
-    xTaskCreatePinnedToCore([](void*) {
-        LogMessage msg;
-        for (;;) {
-            if (xQueueReceive(logQueue, &msg, portMAX_DELAY)) {
-                udpPrint.print(msg.buf);
-            }
+        attachInterruptArg(PIN_TOUCH_INT, touchISR, (void*)this, FALLING);
+    }
+
+    {
+        inputEventQueue = xQueueCreate(32, sizeof(InputEvent));
+
+        xTaskCreatePinnedToCore([](void* inst) {
+            static_cast<App*>(inst)->handleInput();
+        }, "input_handler_task", 8192, this, 1, nullptr, 1);
+    }
+
+    {
+        m_splashScreen = new SplashScreen(display.width(), display.height());
+        m_screen = m_splashScreen;
+
+        xTaskCreatePinnedToCore([](void* inst) {
+            static_cast<App*>(inst)->uiTask();
+        }, "ui_task", 4096, this, 1, nullptr, 0);
+    }
+
+    m_appEventQueue = xQueueCreate(8, sizeof(AppEvent));
+
+    WiFi.onEvent([this](arduino_event_id_t event, arduino_event_info_t info) {
+        switch (event) {
+            case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+                postAppEvent({ AppEventType::WiFiConnected });
+                break;
+
+            case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
+                postAppEvent({ AppEventType::WiFiDisconnected });
+                break;
         }
-    }, "log_task", 2048, nullptr, 1, nullptr, 0);
-
-    esp_log_set_vprintf([](const char* fmt, va_list args) -> int {
-        if (!logQueue) {
-            return 0;
-        }
-
-        LogMessage msg;
-        int len = vsnprintf(msg.buf, sizeof(msg.buf), fmt, args);
-        xQueueSend(logQueue, &msg, 0);
-        return len;
     });
-#endif
-
-    buttonEventQueue = xQueueCreate(32, sizeof(ButtonEvent));
-
-    xTaskCreatePinnedToCore([](void* inst) {
-        static_cast<App*>(inst)->buttonTask();
-    }, "button_task", 8192, this, 2, nullptr, 1);
-
-    pinMode(PIN_BUTTON_1, INPUT_PULLUP);
-    pinMode(PIN_BUTTON_2, INPUT_PULLUP);
-
-    attachInterruptArg(buttons[0].pin, buttonISR, (void*)&buttons[0], CHANGE);
-    attachInterruptArg(buttons[1].pin, buttonISR, (void*)&buttons[1], CHANGE);
-
-    xTaskCreatePinnedToCore([](void* inst) {
-        static_cast<App*>(inst)->touchTask();
-    }, "touch_task", 8192, this, 2, &touchTaskHandle, 1);
-
-    attachInterruptArg(PIN_TOUCH_INT, touchISR, (void*)this, FALLING);
-
-    inputEventQueue = xQueueCreate(32, sizeof(InputEvent));
-
-    xTaskCreatePinnedToCore([](void* inst) {
-        static_cast<App*>(inst)->handleInput();
-    }, "input_handler_task", 8192, this, 1, nullptr, 1);
-
-    display.fillScreen(TFT_BLACK);
-
-    m_screen = new SplashScreen(display.width(), display.height());
-
-    xTaskCreatePinnedToCore([](void* inst) {
-        static_cast<App*>(inst)->uiTask();
-    }, "ui_task", 4096, this, 1, nullptr, 0);
 
     client.onEvent([this](const xr18::XR18Client::Event& e) {
         switch (e.type) {
@@ -106,7 +91,7 @@ bool App::init() {
                 break;
 
             case xr18::XR18Client::Event::Type::SearchStopped:
-                ESP_LOGI(kLogTag, "Search stopped, mixers found: %d", client.mixers().size());
+                postAppEvent({ AppEventType::MixersFound });
                 break;
 
             case xr18::XR18Client::Event::Type::Connected:
@@ -127,14 +112,19 @@ bool App::init() {
         }
     });
 
-    client.start();
-    client.search();
+    xTaskCreatePinnedToCore([](void* inst) {
+        static_cast<App*>(inst)->appTask();
+    }, "app_task", 8192, this, 1, nullptr, 1);
 
     return true;
 }
 
 void App::setScreen(ui::Screen* screen) {
     m_pendingScreen.store(screen);
+}
+
+void App::postAppEvent(AppEvent event) {
+    xQueueSend(m_appEventQueue, &event, 0);
 }
 
 void App::uiTask() {
@@ -151,39 +141,116 @@ void App::uiTask() {
     }
 }
 
+void App::appTask() {
+    AppState curr = AppState::Init;
+    AppState prev = static_cast<AppState>(0xFF);
 
+    for (;;) {
+        bool transited = (curr != prev);
+        prev = curr;
 
+        switch (curr) {
+            case AppState::Init:
+                curr = stateInit(transited);
+                break;
+            case AppState::Normal:
+                curr = stateNormal(transited);
+                break;
+            case AppState::SelectMixer:
+                curr = stateSelectMixer(transited);
+                break;
+            case AppState::WifiConfig:
+                curr = stateWifiConfig(transited);
+                break;
+        }
 
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
+App::AppState App::stateInit(bool transited) {
+    static constexpr uint32_t kSplashMs = 2000;
+    static TickType_t startTime = 0;
 
-
+    if (transited) {
+        startTime = xTaskGetTickCount();
     }
 
+    if (xTaskGetTickCount() - startTime >= pdMS_TO_TICKS(kSplashMs)) {
+        return AppState::Normal;
+    }
+
+    return AppState::Init;
 }
 
+App::AppState App::stateNormal(bool transited) {
+    static constexpr uint8_t kMaxWifiFailures = 5;
+    static uint8_t wifiFailures = 0;
+    static bool clientStarted = false;
 
+    if (transited) {
+        wifiFailures = 0;
+        clientStarted = false;
 
+#ifdef XROSSSYNC_DEBUG
+        udpPrint.startLogging(WiFi.broadcastIP(), 5005);
+#endif
 
+        display.fillScreen(TFT_BLACK);
+        setScreen(new MainScreen(display.width(), display.height()));
+        delete m_splashScreen;
+        m_splashScreen = nullptr;
+    }
 
+    AppEvent event;
+    while (xQueueReceive(m_appEventQueue, &event, 0) == pdTRUE) {
+        switch (event.type) {
+            case AppEventType::WiFiConnected:
+                wifiFailures = 0;
+                if (!clientStarted) {
+                    clientStarted = true;
+                    client.start();
+                    client.search();
+                }
+                break;
 
+            case AppEventType::WiFiDisconnected:
+                wifiFailures++;
+                if (wifiFailures >= kMaxWifiFailures) {
+                    return AppState::WifiConfig;
+                }
+                WiFi.reconnect();
+                break;
 
+            case AppEventType::MixersFound:
+                if (client.mixers().size() > 1) {
+                    return AppState::SelectMixer;
+                }
+                break;
         }
     }
 
+    return AppState::Normal;
 }
 
+App::AppState App::stateSelectMixer(bool transited) {
+    if (transited) {
+        // TODO: setScreen(new MixerSelectionScreen(...))
+        ESP_LOGI(kLogTag, "SelectMixer state — screen not yet implemented");
+    }
 
-
-
-
-
-
-
-
-            }
-
-        }
+    return AppState::SelectMixer;
 }
+
+App::AppState App::stateWifiConfig(bool transited) {
+    if (transited) {
+        WiFi.mode(WIFI_AP);
+        WiFi.softAP("XRossSync");
+        // TODO: setScreen(new NoWiFiScreen(...))
+        ESP_LOGI(kLogTag, "WifiConfig state — AP: %s", WiFi.softAPIP().toString().c_str());
+    }
+
+    return AppState::WifiConfig;
+}
+
 

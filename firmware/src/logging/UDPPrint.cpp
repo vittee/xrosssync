@@ -1,6 +1,12 @@
 #include "UDPPrint.h"
 
-void UDPPrint::setDestination(IPAddress ip, uint16_t port) {
+#ifdef XROSSSYNC_DEBUG
+
+void UDPPrint::startLogging(IPAddress ip, uint16_t port) {
+    if (m_logTaskHandle) {
+        return;
+    }
+
     m_ip = ip;
     m_port = port;
 
@@ -9,6 +15,28 @@ void UDPPrint::setDestination(IPAddress ip, uint16_t port) {
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<UDPPrint*>(inst)->senderTask();
     }, "udpprint", 4096, this, 2, &m_taskHandle, 1);
+
+    m_logQueue = xQueueCreate(8, sizeof(LogMessage));
+
+    xTaskCreatePinnedToCore([](void* inst) {
+        auto* self = static_cast<UDPPrint*>(inst);
+        LogMessage msg;
+        for (;;) {
+            if (xQueueReceive(self->m_logQueue, &msg, portMAX_DELAY)) {
+                self->print(msg.buf);
+            }
+        }
+    }, "log_task", 2048, this, 1, &m_logTaskHandle, 0);
+
+    esp_log_set_vprintf([](const char* fmt, va_list args) -> int {
+        if (!udpPrint.m_logQueue) {
+            return 0;
+        }
+        LogMessage msg;
+        int len = vsnprintf(msg.buf, sizeof(msg.buf), fmt, args);
+        xQueueSend(udpPrint.m_logQueue, &msg, 0);
+        return len;
+    });
 }
 
 size_t UDPPrint::write(uint8_t c) {
@@ -88,3 +116,5 @@ void UDPPrint::senderTask() {
         }
     }
 }
+
+#endif

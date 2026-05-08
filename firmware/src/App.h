@@ -90,13 +90,40 @@ private:
     void touchTask();
     static void touchISR(void* arg);
 
+    enum class AppState : uint8_t {
+        Init,
+        Normal,
+        SelectMixer,
+        WifiConfig,
+    };
+
+    enum class AppEventType : uint8_t {
+        WiFiConnected,
+        WiFiDisconnected,
+        MixersFound,
+    };
+
+    struct AppEvent {
+        AppEventType type;
+    };
+
     void handleInput();
     void uiTask();
+    void appTask();
     void setScreen(ui::Screen* screen);
+    void postAppEvent(AppEvent event);
+
+    AppState stateInit(bool transited);
+    AppState stateNormal(bool transited);
+    AppState stateSelectMixer(bool transited);
+    AppState stateWifiConfig(bool transited);
 
     Display display;
     ui::Screen* m_screen = nullptr;
     std::atomic<ui::Screen*> m_pendingScreen{nullptr};
+
+    ui::Screen* m_splashScreen = nullptr;
+    QueueHandle_t m_appEventQueue = nullptr;
 
     QueueHandle_t buttonEventQueue;
     button_isr_t buttons[2]{

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifdef XROSSSYNC_DEBUG
+
+#include <Arduino.h>
 #include <Print.h>
 #include <AsyncUDP.h>
 #include <IPAddress.h>
@@ -13,6 +16,7 @@ public:
     void flush() override;
 
     void setDestination(IPAddress ip, uint16_t port);
+    void startLogging(IPAddress ip, uint16_t port);
 
 private:
     static constexpr size_t kBufSize = 256;
@@ -34,8 +38,14 @@ private:
 
     QueueHandle_t m_queue = nullptr;
     TaskHandle_t m_taskHandle = nullptr;
+
+    struct LogMessage {
+        char buf[256];
+    };
+
+    QueueHandle_t m_logQueue = nullptr;
+    TaskHandle_t m_logTaskHandle = nullptr;
 };
 
-#ifdef XROSSSYNC_DEBUG
 inline UDPPrint udpPrint;
 #endif

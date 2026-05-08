@@ -80,7 +80,9 @@ XR18Client::XR18Client()
 }
 
 void XR18Client::start() {
-    if (running) return;
+    if (running) {
+        return;
+    }
 
     running = true;
 
