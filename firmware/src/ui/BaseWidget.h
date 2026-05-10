@@ -20,7 +20,7 @@ public:
     void setSize(int16_t w, int16_t h);
     void setBoundBox(int16_t x, int16_t y, int16_t w, int16_t h);
 
-    virtual bool isDirty() const { return m_dirty; }
+    virtual bool isDirty() { return m_dirty; }
     void invalidate();
 
     virtual void draw(LovyanGFX& dst, int16_t offsetX = 0, int16_t offsetY = 0) = 0;

@@ -13,7 +13,7 @@ public:
 
     void add(BaseWidget* child);
 
-    bool isDirty() const override;
+    bool isDirty() override;
     void draw(LovyanGFX& dst, int16_t offsetX = 0, int16_t offsetY = 0) override;
 
 protected:

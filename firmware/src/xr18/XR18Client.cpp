@@ -71,9 +71,16 @@ XR18Client::XR18Client()
     // register event handler for each strip
     for (int i = 0; i < (int)m_channelStrips.size(); i++) {
         auto stripIndex = static_cast<ChannelStrip::StripIndex>(i);
-        m_channelStrips[i].onEvent([this, stripIndex](ChannelStrip::ParamId paramId, params::Param* p) {
+        m_channelStrips[i].onEvent([this, stripIndex](ChannelStrip::ParamId paramId, params::Param* param) {
             if (m_eventCallback) {
-                m_eventCallback(Event::stripChanged(stripIndex, paramId, p));
+                m_eventCallback({
+                    .type = Event::Type::StripChanged,
+                    .strip = {
+                        .index = stripIndex,
+                        .paramId = paramId,
+                        .param = param
+                    }
+                });
             }
         });
     }
@@ -99,7 +106,7 @@ void XR18Client::search() {
     m_mixers.clear();
 
     if (m_eventCallback) {
-        m_eventCallback(Event::searchStarted());
+        m_eventCallback({ Event::Type::SearchStarted });
     }
 
     OSCMessage msg("/xinfo");
@@ -117,10 +124,12 @@ void XR18Client::task() {
         if ((now - lastVitalSign) >= 10e3) {
             lastVitalSign = now;
 
-            if (connected) {
-                connected = false;
+            if (m_connected) {
+                m_connected = false;
+                m_mixerInfo.reset();
+
                 if (m_eventCallback) {
-                    m_eventCallback(Event::disconnected());
+                    m_eventCallback({ Event::Type::Disconnected });
                 }
             }
         }
@@ -142,26 +151,26 @@ void XR18Client::task() {
 }
 
 void XR18Client::stopSearching() {
-    ESP_LOGD(kLogTag, "Autoconnect connected=%d, ip=%s, mixers found=%d", connected, osc.getAddress().toString().c_str(), m_mixers.size());
-
     if (m_eventCallback) {
-        m_eventCallback(Event::searchStopped(m_mixers.size()));
+        m_eventCallback({ Event::Type::SearchStopped });
     }
 
-    if (!connected && m_mixers.size() > 0) {
-        connected = true;
+    if (!m_connected && m_mixers.size() > 0) {
         setAddress(m_mixers.front().ip);
-
-        if (m_eventCallback) {
-            m_eventCallback(Event::connected(m_mixers.front()));
-        }
-
         heartbeat();
-        synchronize();
+        synchronize(m_mixers.front());
     }
 }
 
-void XR18Client::synchronize() {
+void XR18Client::synchronize(MixerInfo &info) {
+    m_connected = true;
+
+    m_mixerInfo.emplace(info);
+
+    if (m_eventCallback) {
+        m_eventCallback({ Event::Type::Connected });
+    }
+
     OSCMessage msg;
 
     for (auto& ch : m_rootNode.channels()) {
@@ -223,6 +232,18 @@ void XR18Client::synchronize() {
     }
 
     {
+        auto lr = m_rootNode.lr();
+
+        msg.empty();
+        msg.setAddress(lr.config().path().c_str());
+        send(msg, portMAX_DELAY);
+
+        msg.empty();
+        msg.setAddress(lr.mix().path().c_str());
+        send(msg, portMAX_DELAY);
+    }
+
+    {
         msg.empty();
         msg.setAddress(m_rootNode.state().solo().path().c_str());
         send(msg, portMAX_DELAY);
@@ -235,7 +256,7 @@ void XR18Client::synchronize() {
     }
 
     if (m_eventCallback) {
-        m_eventCallback(Event::synchronized());
+        m_eventCallback({ Event::Type::Synchronized });
     }
 }
 
@@ -293,14 +314,8 @@ void XR18Client::handleSTATUS(OSCMessage &msg) {
     msg.getString(2, name, sizeof(name));
 #endif
 
-    if (!searching && !connected) {
-        connected = true;
-
-        if (m_eventCallback) {
-            m_eventCallback(Event::connected(m_mixers.front()));
-        }
-
-        synchronize();
+    if (!searching && !m_connected) {
+        synchronize(m_mixers.front());
     }
 }
 
@@ -329,6 +344,10 @@ void XR18Client::handleXINFO(OSCMessage &msg) {
     if (it == m_mixers.end()) {
         m_mixers.emplace_back(info);
     }
+}
+
+void XR18Client::onEvent(std::function<void(const Event&)> cb) {
+    m_eventCallback = std::move(cb);
 }
 
 }

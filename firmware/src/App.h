@@ -11,11 +11,15 @@
 #include "xr18/XR18Client.h"
 #include "ui/Screen.h"
 
+class MainScreen;
+
 class App {
 public:
     App();
 
     bool init();
+
+    inline xr18::XR18Client& client() { return m_client; }
 
 private:
     class Display : public lgfx::LGFX_Device {
@@ -53,8 +57,8 @@ private:
     };
 
     struct TouchPoint {
-        int16_t x = -1;
-        int16_t y = -1;
+        int16_t x;
+        int16_t y;
     };
 
     struct TouchEvent {
@@ -66,14 +70,14 @@ private:
         TouchFlag flag;
     };
 
-    enum class InputEventType {
-        Button,
-        Home,
-        Touch
-    };
-
     struct InputEvent {
-        InputEventType type;
+        enum class Type {
+            Button,
+            Home,
+            Touch
+        };
+
+        Type type;
 
         union {
             ButtonEvent button;
@@ -97,14 +101,24 @@ private:
         WifiConfig,
     };
 
-    enum class AppEventType : uint8_t {
-        WiFiConnected,
-        WiFiDisconnected,
-        MixersFound,
-    };
-
     struct AppEvent {
-        AppEventType type;
+        enum class Type : uint8_t {
+            WiFiDisconnected,
+            WiFiConnected,
+            MixerSearchStarted,
+            MixerSearchStop,
+            MixerDisconnected,
+            MixerConnected,
+            MixerSynchronized,
+            Input
+        };
+
+        Type type;
+
+        union {
+            InputEvent input;
+        };
+
     };
 
     void handleInput();
@@ -118,11 +132,12 @@ private:
     AppState stateSelectMixer(bool transited, TickType_t& delay);
     AppState stateWifiConfig(bool transited, TickType_t& delay);
 
-    Display display;
+    Display m_display;
     ui::Screen* m_screen = nullptr;
     std::atomic<ui::Screen*> m_pendingScreen{nullptr};
 
     ui::Screen* m_splashScreen = nullptr;
+    MainScreen* m_mainScreen = nullptr;
     QueueHandle_t m_appEventQueue = nullptr;
 
     QueueHandle_t buttonEventQueue;
@@ -137,7 +152,7 @@ private:
     QueueHandle_t inputEventQueue;
     InputEvent lastInputEvent{};
 
-    xr18::XR18Client client;
+    xr18::XR18Client m_client;
 
     static constexpr uint8_t PIN_BUTTON_1 = 0;
     static constexpr uint8_t PIN_BUTTON_2 = 14;

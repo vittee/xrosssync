@@ -20,6 +20,12 @@ public:
         String version;
     };
 
+    struct StripChanged {
+        ChannelStrip::StripIndex index;
+        ChannelStrip::ParamId paramId;
+        nodes::params::Param *param;
+    };
+
     struct Event {
     public:
         enum class Type : uint8_t {
@@ -34,48 +40,8 @@ public:
         Type type;
 
         union {
-            struct {
-                const MixerInfo *mixer;
-            } info;
-
-            struct {
-                ChannelStrip::StripIndex index;
-                ChannelStrip::ParamId paramId;
-                nodes::params::Param *param;
-            } strip;
+            StripChanged strip;
         };
-
-    private:
-        friend class XR18Client;
-
-        static Event searchStarted() { return { .type = Type::SearchStarted }; }
-
-        static Event searchStopped(uint8_t mixersFound) {
-            return { .type = Type::SearchStopped };
-        }
-
-        static Event connected(const MixerInfo &m) {
-            return {
-                .type = Type::Connected,
-                .info = {&m}
-            };
-        }
-
-        static Event disconnected() { return { Type::Disconnected }; }
-
-        static Event synchronized() { return { Type::Synchronized }; }
-
-        static Event stripChanged(ChannelStrip::StripIndex index, ChannelStrip::ParamId paramId, nodes::params::Param *param) {
-            Event e;
-            return {
-                .type = Type::StripChanged,
-                .strip = {
-                    .index = index,
-                    .paramId = paramId,
-                    .param = param
-                }
-            };
-        }
     };
 
 public:
@@ -89,6 +55,8 @@ public:
         return osc.send(msg, timeout, 1);
     }
 
+    inline bool connected() const { return m_connected; }
+
     void start();
 
     void search();
@@ -97,16 +65,20 @@ public:
 
     inline std::vector<MixerInfo> mixers() const { return m_mixers; }
 
+    inline std::optional<MixerInfo> mixerInfo() const { return m_mixerInfo; }
+
     inline nodes::RootNode& rootNode() { return m_rootNode; }
 
-    inline ChannelStrip& channelStrip(ChannelStrip::StripIndex index);
+    inline ChannelStrip& channelStrip(ChannelStrip::StripIndex index) {
+        return m_channelStrips[static_cast<uint8_t>(index)];
+    }
 
 private:
     void task();
 
     void stopSearching();
 
-    void synchronize();
+    void synchronize(MixerInfo &info);
 
     void heartbeat();
 
@@ -119,7 +91,7 @@ private:
     bool running = false;
     TaskHandle_t taskHandle;
 
-    bool connected = false;
+    bool m_connected = false;
     unsigned long lastHeartbeat = 0;
     unsigned long lastVitalSign = 0;
 
@@ -127,6 +99,7 @@ private:
     unsigned long searchStartTime = 0;
 
     std::vector<MixerInfo> m_mixers{1};
+    std::optional<MixerInfo> m_mixerInfo;
 
     nodes::RootNode m_rootNode;
     std::vector<ChannelStrip> m_channelStrips;
@@ -134,13 +107,5 @@ private:
 
     Osc osc;
 };
-
-inline ChannelStrip& XR18Client::channelStrip(ChannelStrip::StripIndex index) {
-    return m_channelStrips[static_cast<uint8_t>(index)];
-}
-
-inline void XR18Client::onEvent(std::function<void(const Event&)> cb) {
-    m_eventCallback = std::move(cb);
-}
 
 }

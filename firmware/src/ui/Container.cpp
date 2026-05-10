@@ -12,7 +12,7 @@ void Container::add(BaseWidget* child) {
     m_children.push_back(child);
 }
 
-bool Container::isDirty() const {
+bool Container::isDirty() {
     for (auto* child : m_children) {
         if (child->isDirty()) {
             return true;

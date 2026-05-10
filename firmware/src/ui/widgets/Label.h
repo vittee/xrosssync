@@ -28,6 +28,7 @@ public:
     const String& text() const { return m_text; }
 
     void setFont(const lgfx::IFont* font);
+    void setTextSize(float size);
     void setHAlign(HAlign align);
     void setVAlign(VAlign align);
     void setTextColor(int32_t color);

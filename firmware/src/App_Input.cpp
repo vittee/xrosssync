@@ -31,7 +31,7 @@ void App::buttonTask() {
                 lastChangeTime = now;
 
                 InputEvent inputEvent = {};
-                inputEvent.type = InputEventType::Button;
+                inputEvent.type = InputEvent::Type::Button;
                 inputEvent.button = event;
 
                 xQueueSend(inputEventQueue, &inputEvent, portMAX_DELAY);
@@ -53,7 +53,7 @@ void App::touchTask() {
     for (;;) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-        auto touch = display.touch();
+        auto touch = m_display.touch();
         auto cfg = touch->config();
 
         uint8_t reg = 0x02;
@@ -73,11 +73,11 @@ void App::touchTask() {
             bool isHome = (x == 85) && (y == 360);
 
             lgfx::v1::touch_point_t lgfx_tp{ .x = x, .y = y, .size = 0, .id = 1 };
-            display.panel()->convertRawXY(&lgfx_tp, 1);
+            m_display.panel()->convertRawXY(&lgfx_tp, 1);
             TouchPoint tp{ .x = lgfx_tp.x, .y = lgfx_tp.y };
 
             InputEvent inputEvent = {};
-            inputEvent.type = isHome ? InputEventType::Home : InputEventType::Touch;
+            inputEvent.type = isHome ? InputEvent::Type::Home : InputEvent::Type::Touch;
 
             switch (eventFlag) {
                 case TouchFlag::Down:
@@ -92,15 +92,15 @@ void App::touchTask() {
 
                 case TouchFlag::Contact:
                     if (isHome) {
-                        if (lastInputEvent.type == InputEventType::Touch) {
+                        if (lastInputEvent.type == InputEvent::Type::Touch) {
                             InputEvent explicitEvent = {};
 
-                            explicitEvent.type = InputEventType::Touch;
+                            explicitEvent.type = InputEvent::Type::Touch;
                             explicitEvent.touch.flag = TouchFlag::Up;
                             explicitEvent.touch.point = tp;
                             xQueueSend(inputEventQueue, &explicitEvent, portMAX_DELAY);
 
-                            explicitEvent.type = InputEventType::Home;
+                            explicitEvent.type = InputEvent::Type::Home;
                             explicitEvent.home.flag = TouchFlag::Down;
                             xQueueSend(inputEventQueue, &explicitEvent, portMAX_DELAY);
 
@@ -110,14 +110,14 @@ void App::touchTask() {
                         continue;
                     }
 
-                    if (lastInputEvent.type == InputEventType::Home) {
+                    if (lastInputEvent.type == InputEvent::Type::Home) {
                         InputEvent explicitEvent = {};
 
-                        explicitEvent.type = InputEventType::Home;
+                        explicitEvent.type = InputEvent::Type::Home;
                         explicitEvent.home.flag = TouchFlag::Up;
                         xQueueSend(inputEventQueue, &explicitEvent, portMAX_DELAY);
 
-                        explicitEvent.type = InputEventType::Touch;
+                        explicitEvent.type = InputEvent::Type::Touch;
                         explicitEvent.touch.flag = TouchFlag::Down;
                         explicitEvent.touch.point = tp;
                         xQueueSend(inputEventQueue, &explicitEvent, portMAX_DELAY);
@@ -156,19 +156,10 @@ void App::handleInput() {
 
     for (;;) {
         if (xQueueReceive(inputEventQueue, &event, portMAX_DELAY)) {
-            switch (event.type) {
-                case InputEventType::Button:
-                    ESP_LOGI(kLogTag, "Button%d %d", event.button.button, event.button.pressed);
-                    break;
-
-                case InputEventType::Home:
-                    ESP_LOGI(kLogTag, "Home %d", static_cast<uint8_t>(event.home.flag));
-                    break;
-
-                case InputEventType::Touch:
-                    ESP_LOGI(kLogTag, "Touch flag=%d, x=%d, y=%d", static_cast<uint8_t>(event.touch.flag), event.touch.point.x, event.touch.point.y);
-                    break;
-            }
+            postAppEvent({
+                .type = AppEvent::Type::Input,
+                .input = event
+            });
         }
     }
 }

@@ -30,6 +30,11 @@ void Label::setFont(const lgfx::IFont* font) {
     invalidate();
 }
 
+void Label::setTextSize(float size) {
+    m_sprite.setTextSize(size);
+    invalidate();
+}
+
 void Label::setHAlign(HAlign align) {
     m_hAlign = align;
     invalidate();

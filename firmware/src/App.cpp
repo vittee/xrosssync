@@ -10,20 +10,17 @@ App::App() {
 bool App::init() {
     ESP_LOGI(kLogTag, "Starting");
 
-    if (!display.init()) {
+    if (!m_display.init()) {
         ESP_LOGE(kLogTag, "Display initialization failed");
         return false;
     }
 
     delay(100);
-    display.setRotation(0);
-    display.setBrightness(255);
+    m_display.setRotation(0);
+    m_display.setBrightness(255);
 
-    display.selfTest();
-    display.fillScreen(TFT_BLACK);
-
-    WiFi.mode(WIFI_STA);
-    WiFi.begin();
+    m_display.selfTest();
+    m_display.fillScreen(TFT_BLACK);
 
     {
         buttonEventQueue = xQueueCreate(32, sizeof(ButtonEvent));
@@ -58,7 +55,7 @@ bool App::init() {
     }
 
     {
-        m_splashScreen = new SplashScreen(display.width(), display.height());
+        m_splashScreen = new SplashScreen(m_display.width(), m_display.height());
         m_screen = m_splashScreen;
 
         xTaskCreatePinnedToCore([](void* inst) {
@@ -70,36 +67,38 @@ bool App::init() {
 
     WiFi.onEvent([this](arduino_event_id_t event, arduino_event_info_t info) {
         switch (event) {
-            case ARDUINO_EVENT_WIFI_STA_GOT_IP:
-                postAppEvent({ AppEventType::WiFiConnected });
-                break;
-
             case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
-                postAppEvent({ AppEventType::WiFiDisconnected });
+                postAppEvent({ AppEvent::Type::WiFiDisconnected });
+                break;
+            case ARDUINO_EVENT_WIFI_STA_GOT_IP:
+                postAppEvent({ AppEvent::Type::WiFiConnected });
                 break;
         }
     });
 
-    client.onEvent([this](const xr18::XR18Client::Event& e) {
+    WiFi.mode(WIFI_STA);
+    WiFi.begin();
+
+    m_client.onEvent([this](const xr18::XR18Client::Event& e) {
         switch (e.type) {
             case xr18::XR18Client::Event::Type::SearchStarted:
-                ESP_LOGI(kLogTag, "Searching for mixer...");
+                postAppEvent({ AppEvent::Type::MixerSearchStarted });
                 break;
 
             case xr18::XR18Client::Event::Type::SearchStopped:
-                postAppEvent({ AppEventType::MixersFound });
+                postAppEvent({ AppEvent::Type::MixerSearchStop });
                 break;
 
             case xr18::XR18Client::Event::Type::Connected:
-                ESP_LOGI(kLogTag, "Connected to %s (%s)", e.info.mixer->name.c_str(), e.info.mixer->ip.toString().c_str());
+                postAppEvent({ AppEvent::Type::MixerConnected });
                 break;
 
             case xr18::XR18Client::Event::Type::Disconnected:
-                ESP_LOGI(kLogTag, "Disconnected");
+                postAppEvent({ AppEvent::Type::MixerDisconnected });
                 break;
 
             case xr18::XR18Client::Event::Type::Synchronized:
-                ESP_LOGI(kLogTag, "Synchronized");
+                postAppEvent({ AppEvent::Type::MixerSynchronized });
                 break;
 
             case xr18::XR18Client::Event::Type::StripChanged:
@@ -111,6 +110,8 @@ bool App::init() {
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<App*>(inst)->appTask();
     }, "app_task", 8192, this, 1, nullptr, 1);
+
+    m_client.start();
 
     return true;
 }
@@ -130,7 +131,7 @@ void App::uiTask() {
         }
 
         if (m_screen) {
-            m_screen->render(display);
+            m_screen->render(m_display);
         }
 
         vTaskDelay(pdMS_TO_TICKS(1000/30)); // 30fps
