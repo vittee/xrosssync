@@ -44,7 +44,6 @@ protected:
 
     ParamType paramType;
 
-private:
     std::vector<std::function<void()>> m_callbacks;
 };
 
