@@ -57,10 +57,16 @@ void MainScreen::StatusBar::setStatus(const Status& status) {
     updateRSSI();
 }
 
+#ifdef XROSSSYNC_DEBUG
+static constexpr uint8_t kStatusLines = 5;
+#else
+static constexpr uint8_t kStatusLines = 4;
+#endif
+
 void MainScreen::StatusBar::updateStatusLabel() {
     auto mixerInfo = m_app->client().mixerInfo().value();
 
-    switch (m_cycleIndex % 4) {
+    switch (m_cycleIndex % kStatusLines) {
         case 0:
             m_infoLabel.setText(mixerInfo.name);
             break;
@@ -73,9 +79,13 @@ void MainScreen::StatusBar::updateStatusLabel() {
         case 3:
             m_infoLabel.setText("Via " + WiFi.SSID());
             break;
+
+        #ifdef XROSSSYNC_DEBUG
+        case 4:
+            m_infoLabel.setText("Heap: " + String(ESP.getHeapSize() / 1024.0f, 2) + "KiB, Free: " + String(ESP.getFreeHeap() / 1024.0f, 2) + "KiB");
+            break;
+        #endif
     }
-
-
 }
 
 void MainScreen::StatusBar::updateRSSI() {
@@ -96,7 +106,7 @@ bool MainScreen::StatusBar::isDirty() {
 
         if (now - m_lastCycleMs >= 5e3) {
             m_lastCycleMs = now;
-            m_cycleIndex = (m_cycleIndex + 1) % 4;
+            m_cycleIndex = (m_cycleIndex + 1) % kStatusLines;
             updateStatusLabel();
             result = true;
         }
