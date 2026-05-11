@@ -60,7 +60,7 @@ bool App::init() {
 
         xTaskCreatePinnedToCore([](void* inst) {
             static_cast<App*>(inst)->uiTask();
-        }, "ui_task", 4096, this, 1, nullptr, 0);
+        }, "ui_task", 16384, this, 1, nullptr, 0);
     }
 
     m_appEventQueue = xQueueCreate(8, sizeof(AppEvent));
