@@ -61,7 +61,7 @@ private:
 
         static constexpr int16_t kWifiWidth = 20;
         static constexpr int16_t kXMargin = 2;
-        static constexpr uint16_t kBgColor = lgfx::v1::color565(8, 8, 8);
+        static constexpr uint16_t kBgColor = lgfx::color565(8, 8, 8);
     };
 
     class MixerPanel : public ui::Container {

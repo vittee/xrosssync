@@ -49,7 +49,7 @@ App::AppState App::stateNormal(bool transited, TickType_t& delay) {
     }
 
     AppEvent event;
-    while (xQueueReceive(m_appEventQueue, &event, 0) == pdTRUE) {
+    while (xQueueReceive(m_appEventQueue, &event, 0)) {
         switch (event.type) {
             case AppEvent::Type::WiFiConnected:
                 wifiFailures = 0;
@@ -92,6 +92,7 @@ App::AppState App::stateNormal(bool transited, TickType_t& delay) {
                         m_mainScreen->setStatus({ MainScreen::Status::Type::NotConencted });
                     }
                 }
+
                 break;
             }
 
@@ -108,7 +109,6 @@ App::AppState App::stateNormal(bool transited, TickType_t& delay) {
                 break;
 
             case AppEvent::Type::MixerSynchronized:
-                // TODO:
                 break;
 
             case AppEvent::Type::Input:
