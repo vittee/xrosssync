@@ -100,10 +100,6 @@ bool App::init() {
             case xr18::XR18Client::Event::Type::Synchronized:
                 postAppEvent({ AppEvent::Type::MixerSynchronized });
                 break;
-
-            case xr18::XR18Client::Event::Type::StripChanged:
-                ESP_LOGI(kLogTag, "Strip[%d] param=%d value=%s", e.strip.index, e.strip.paramId, e.strip.param->formatValue().c_str());
-                break;
         }
     });
 

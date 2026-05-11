@@ -20,12 +20,6 @@ public:
         String version;
     };
 
-    struct StripChanged {
-        ChannelStrip::StripIndex index;
-        ChannelStrip::ParamId paramId;
-        nodes::params::Param *param;
-    };
-
     struct Event {
     public:
         enum class Type : uint8_t {
@@ -33,15 +27,10 @@ public:
             SearchStopped,
             Connected,
             Disconnected,
-            Synchronized,
-            StripChanged,
+            Synchronized
         };
 
         Type type;
-
-        union {
-            StripChanged strip;
-        };
     };
 
 public:
