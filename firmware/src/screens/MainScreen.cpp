@@ -83,7 +83,7 @@ void MainScreen::StatusBar::updateRSSI() {
 }
 
 bool MainScreen::StatusBar::isDirty() {
-    bool result = false;
+    bool result = ui::Container::isDirty();
 
     if (m_status.type == Status::Type::Connected) {
         auto now = millis();
@@ -102,5 +102,5 @@ bool MainScreen::StatusBar::isDirty() {
         }
     }
 
-    return result | ui::Container::isDirty();
+    return result;
 }
