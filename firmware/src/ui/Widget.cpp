@@ -6,6 +6,7 @@ namespace ui {
 Widget::Widget(int16_t x, int16_t y, int16_t w, int16_t h, lgfx::color_depth_t colorDepth)
     : BaseWidget(x, y, w, h)
 {
+    m_sprite.setPsram(true);
     m_sprite.setColorDepth(colorDepth);
 
     if (!m_sprite.createSprite(w, h)) {
