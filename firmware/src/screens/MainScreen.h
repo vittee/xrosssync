@@ -36,6 +36,14 @@ public:
         m_statusBar.setStatus(status);
     }
 
+    inline void nextPage() { m_panel.nextPage(); };
+
+    inline void prevPage() { m_panel.prevPage(); };
+
+    inline void firstPage() { m_panel.setPage(0); };
+
+    inline int page() const { return m_panel.page(); }
+
 private:
     class StatusBar : public ui::Container {
     public:

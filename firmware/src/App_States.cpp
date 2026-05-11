@@ -112,11 +112,25 @@ App::AppState App::stateNormal(bool transited, TickType_t& delay) {
             case AppEvent::Type::Input:
                 switch (event.input.type) {
                     case InputEvent::Type::Button:
-                        ESP_LOGI(kLogTag, "Button%d %d", event.input.button.button, event.input.button.pressed);
+                        if (m_mainScreen) {
+                            if (event.input.button.pressed) {
+                                switch (event.input.button.button) {
+                                    case 1:
+                                        m_mainScreen->prevPage();
+                                        break;
+
+                                    case 2:
+                                        m_mainScreen->nextPage();
+                                        break;
+                                }
+                            }
+                        }
                         break;
 
                     case InputEvent::Type::Home:
-                        ESP_LOGI(kLogTag, "Home %d", static_cast<uint8_t>(event.input.home.flag));
+                        if (m_mainScreen) {
+                            m_mainScreen->firstPage();
+                        }
                         break;
 
                     case InputEvent::Type::Touch:
