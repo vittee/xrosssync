@@ -12,6 +12,10 @@ void Container::add(BaseWidget* child) {
     m_children.push_back(child);
 }
 
+void Container::clear() {
+    m_children.clear();
+}
+
 bool Container::isDirty() {
     bool result = false;
 
