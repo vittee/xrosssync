@@ -12,6 +12,10 @@ void Container::add(BaseWidget* child) {
     m_children.push_back(child);
 }
 
+void Container::remove(BaseWidget* child) {
+    m_children.erase(std::remove(m_children.begin(), m_children.end(), child), m_children.end());
+}
+
 void Container::clear() {
     m_children.clear();
 }
