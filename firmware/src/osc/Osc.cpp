@@ -19,8 +19,8 @@ namespace {
 
 Osc::Osc()
 {
-    rxQueue = xQueueCreate(128, sizeof(RawOsc));
-    txQueue = xQueueCreate(64, sizeof(OutgoingOsc));
+    rxQueue = xQueueCreate(96, sizeof(RawOsc));
+    txQueue = xQueueCreate(32, sizeof(OutgoingOsc));
 }
 
 Osc::~Osc() {
