@@ -14,7 +14,7 @@ Widget::Widget(int16_t x, int16_t y, int16_t w, int16_t h, lgfx::color_depth_t c
 }
 
 void Widget::draw(LovyanGFX& dst, int16_t offsetX, int16_t offsetY) {
-    if (m_dirty) {
+    if (isDirty()) {
         render();
         clearDirty();
     }
