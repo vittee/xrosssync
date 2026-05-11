@@ -27,6 +27,10 @@ public:
 
     MainScreen(App* app, int16_t w, int16_t h);
 
+    bool isDirty() override {
+        return ui::Screen::isDirty() || true;
+    }
+
     inline void setStatus(const Status& status) {
         m_statusBar.setStatus(status);
     }
