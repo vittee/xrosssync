@@ -23,6 +23,8 @@ public:
     virtual float getFloatValue() const = 0;
 
     virtual void setFloatValue(float newValue) = 0;
+
+    float getNormalizedValue() const { return (float)m_value / (float)m_max; }
 };
 
 } // namespace params

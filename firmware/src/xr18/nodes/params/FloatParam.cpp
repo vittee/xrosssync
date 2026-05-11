@@ -23,7 +23,7 @@ bool FloatParam::applyOsc(OSCMessage& msg, int index) {
 void FloatParam::buildOsc(OSCMessage& msg) {
     msg.empty();
     msg.setAddress(m_path.c_str());
-    msg.set(0, (float)m_value / (float)m_max);
+    msg.set(0, getNormalizedValue());
 }
 } // namespace params
 } // namespace nodes
