@@ -3,7 +3,7 @@
 namespace xr18 {
 
 ChannelStrip::ChannelStrip(
-    NodeType type,
+    channels::Channel ch,
     params::StringParam& name,
     params::IntParam& color,
     params::EnumParam& on,
@@ -11,7 +11,7 @@ ChannelStrip::ChannelStrip(
     params::LerpParam* pan,
     params::EnumParam& solosw
 ) :
-    m_type(type),
+    m_ch(ch),
     m_name(&name),
     m_color(&color),
     m_on(&on),
@@ -53,9 +53,9 @@ void ChannelStrip::onEvent(ChannelEventFn cb) {
 
 }
 
-ChannelStrip ChannelStrip::from(channels::InputChannel& ch, params::EnumParam& solosw) {
-    return ChannelStrip(
-        NodeType::Input,
+ChannelStrip* ChannelStrip::from(channels::InputChannel& ch, params::EnumParam& solosw) {
+    return new ChannelStrip(
+        ch,
         ch.config().name(),
         ch.config().color(),
         ch.mix().on(),
@@ -65,9 +65,9 @@ ChannelStrip ChannelStrip::from(channels::InputChannel& ch, params::EnumParam& s
     );
 }
 
-ChannelStrip ChannelStrip::from(channels::ReturnChannel& ch, params::EnumParam& solosw) {
-    return ChannelStrip(
-        NodeType::Return,
+ChannelStrip* ChannelStrip::from(channels::ReturnChannel& ch, params::EnumParam& solosw) {
+    return new ChannelStrip(
+        ch,
         ch.config().name(),
         ch.config().color(),
         ch.mix().on(),
@@ -77,9 +77,9 @@ ChannelStrip ChannelStrip::from(channels::ReturnChannel& ch, params::EnumParam& 
     );
 }
 
-ChannelStrip ChannelStrip::from(channels::BusChannel& ch, params::EnumParam& solosw) {
-    return ChannelStrip(
-        NodeType::Bus,
+ChannelStrip* ChannelStrip::from(channels::BusChannel& ch, params::EnumParam& solosw) {
+    return new ChannelStrip(
+        ch,
         ch.config().name(),
         ch.config().color(),
         ch.mix().on(),
@@ -89,9 +89,9 @@ ChannelStrip ChannelStrip::from(channels::BusChannel& ch, params::EnumParam& sol
     );
 }
 
-ChannelStrip ChannelStrip::from(channels::FxSendChannel& ch, params::EnumParam& solosw) {
-    return ChannelStrip(
-        NodeType::FxSend,
+ChannelStrip* ChannelStrip::from(channels::FxSendChannel& ch, params::EnumParam& solosw) {
+    return new ChannelStrip(
+        ch,
         ch.config().name(),
         ch.config().color(),
         ch.mix().on(),
@@ -101,9 +101,9 @@ ChannelStrip ChannelStrip::from(channels::FxSendChannel& ch, params::EnumParam& 
     );
 }
 
-ChannelStrip ChannelStrip::from(channels::DCAChannel& ch, params::EnumParam& solosw) {
-    return ChannelStrip(
-        NodeType::DCA,
+ChannelStrip* ChannelStrip::from(channels::DCAChannel& ch, params::EnumParam& solosw) {
+    return new ChannelStrip(
+        ch,
         ch.config().name(),
         ch.config().color(),
         ch.on(),
@@ -113,9 +113,9 @@ ChannelStrip ChannelStrip::from(channels::DCAChannel& ch, params::EnumParam& sol
     );
 }
 
-ChannelStrip ChannelStrip::from(channels::MainChannel& ch, params::EnumParam& solosw) {
-    return ChannelStrip(
-        NodeType::LR,
+ChannelStrip* ChannelStrip::from(channels::MainChannel& ch, params::EnumParam& solosw) {
+    return new ChannelStrip(
+        ch,
         ch.config().name(),
         ch.config().color(),
         ch.mix().on(),

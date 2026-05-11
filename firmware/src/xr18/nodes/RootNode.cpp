@@ -10,7 +10,7 @@ RootNode::RootNode(Osc& osc)
     osc(osc),
     ch("ch", this),
     rtn("rtn", this),
-    m_aux("aux", &rtn),
+    m_aux("aux", "Aux", &rtn),
     bus("bus", this),
     fxsend("fxsend", this),
     m_lr("lr", this),
@@ -25,27 +25,28 @@ RootNode::RootNode(Osc& osc)
     for (int i = 0; i < 16; i++) {
         char buf[3];
         snprintf(buf, sizeof(buf), "%02d", i + 1);
-        m_channels.emplace_back(String(buf), &ch);
+        String name = buf;
+        m_channels.emplace_back(name, name, &ch);
     }
 
     m_fxReturns.reserve(4);
     for (int i = 0; i < 4; i++) {
-        m_fxReturns.emplace_back(String(i + 1), &rtn);
+        m_fxReturns.emplace_back(String(i + 1), "FX " + String(i + 1), &rtn);
     }
 
     m_buses.reserve(6);
     for (int i = 0; i < 6; i++) {
-        m_buses.emplace_back(String(i + 1), &bus);
+        m_buses.emplace_back(String(i + 1), "Bus " + String(i + 1), &bus);
     }
 
     m_fxSends.reserve(4);
     for (int i = 0; i < 4; i++) {
-        m_fxSends.emplace_back(String(i + 1), &fxsend);
+        m_fxSends.emplace_back(String(i + 1), "FX Send " + String(i + 1), &fxsend);
     }
 
     m_dcas.reserve(4);
     for (int i = 0; i < 4; i++) {
-        m_dcas.emplace_back(String(i + 1), &dca);
+        m_dcas.emplace_back(String(i + 1), "DCA " + String(i + 1), &dca);
     }
 
     buildPath();

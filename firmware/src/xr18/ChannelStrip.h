@@ -37,16 +37,17 @@ public:
 
     typedef std::function<void(ParamId, params::Param*)> ChannelEventFn;
 
-    static ChannelStrip from(channels::InputChannel& ch, params::EnumParam& solosw);
-    static ChannelStrip from(channels::ReturnChannel& ch, params::EnumParam& solosw);
-    static ChannelStrip from(channels::BusChannel& ch, params::EnumParam& solosw);
-    static ChannelStrip from(channels::FxSendChannel& ch, params::EnumParam& solosw);
-    static ChannelStrip from(channels::DCAChannel& ch, params::EnumParam& solosw);
-    static ChannelStrip from(channels::MainChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip* from(channels::InputChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip* from(channels::ReturnChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip* from(channels::BusChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip* from(channels::FxSendChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip* from(channels::DCAChannel& ch, params::EnumParam& solosw);
+    static ChannelStrip* from(channels::MainChannel& ch, params::EnumParam& solosw);
 
     void onEvent(ChannelEventFn cb);
 
-    NodeType channelType() const { return m_type; }
+    inline NodeType channelType() const { return m_ch.type(); }
+    inline const String& internalName() const { return m_ch.internalName(); }
 
     inline params::StringParam& name() const { return *m_name; }
     inline params::IntParam& color() { return *m_color; }
@@ -57,8 +58,10 @@ public:
     inline params::EnumParam& solosw() { return *m_solosw; }
 
 private:
+    friend class XR18Client;
+
     ChannelStrip(
-        NodeType type,
+        channels::Channel m_ch,
         params::StringParam& name,
         params::IntParam& color,
         params::EnumParam& on,
@@ -68,6 +71,7 @@ private:
     );
 
     NodeType m_type;
+    channels::Channel m_ch;
     params::StringParam* m_name;
     params::IntParam* m_color;
     params::EnumParam* m_on;

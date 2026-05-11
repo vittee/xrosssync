@@ -27,12 +27,13 @@ protected:
 
 class InputChannel : public Channel {
 public:
-    InputChannel(String name, Node* parent)
+    InputChannel(String nodeName, String internalName, Node* parent)
         :
-        Channel(name, parent, NodeType::Input),
+        Channel(nodeName, parent, NodeType::Input),
         m_mix(this),
         m_config(this)
     {
+        m_internalName = internalName;
     }
 
     inline InputConfig& config() { return m_config; }
@@ -45,12 +46,13 @@ private:
 
 class ReturnChannel : public Channel {
 public:
-    ReturnChannel(String name, Node* parent)
+    ReturnChannel(String nodeName, String internalName, Node* parent)
         :
-        Channel(name, parent, NodeType::Return),
+        Channel(nodeName, parent, NodeType::Return),
         m_mix(this),
         m_config(this)
     {
+        m_internalName = internalName;
     }
 
     inline ReturnConfig& config() { return m_config; }
@@ -63,12 +65,13 @@ private:
 
 class BusChannel : public Channel {
 public:
-    BusChannel(String name, Node* parent)
+    BusChannel(String nodeName, String internalName, Node* parent)
         :
-        Channel(name, parent, NodeType::Bus),
+        Channel(nodeName, parent, NodeType::Bus),
         m_config(this),
         m_mix(this)
     {
+        m_internalName = internalName;
     }
 
     inline Config& config() { return m_config; }
@@ -83,12 +86,13 @@ private:
 
 class FxSendChannel : public Channel {
 public:
-    FxSendChannel(String name, Node* parent)
+    FxSendChannel(String nodeName, String internalName, Node* parent)
         :
-        Channel(name, parent, NodeType::FxSend),
+        Channel(nodeName, parent, NodeType::FxSend),
         m_config(this),
         m_mix(this)
     {
+        m_internalName = internalName;
     }
 
     inline Config& config() { return m_config; }
@@ -101,12 +105,13 @@ private:
 
 class MainChannel : public Channel {
 public:
-    MainChannel(String name, Node* parent)
+    MainChannel(String nodeName, Node* parent)
         :
-        Channel(name, parent, NodeType::LR),
+        Channel(nodeName, parent, NodeType::LR),
         m_config(this),
         m_mix(this)
     {
+        m_internalName = "LR";
     }
 
     inline Config& config() { return m_config; }
@@ -120,16 +125,16 @@ private:
 /**
  * A special channel type which acting like a Mix itself, but also has Config
  */
-class DCAChannel : Node {
+class DCAChannel : public Channel {
 public:
-    DCAChannel(String name, Node* parent)
+    DCAChannel(String nodeName, String internalName, Node* parent)
         :
-        Node(name, parent),
+        Channel(nodeName, parent, NodeType::DCA),
         m_on("on", this, params::kOffOn),
         m_fader("fader", this, 1023),
         m_config(this)
     {
-        this->m_type = NodeType::DCA;
+        m_internalName = internalName;
     }
 
     inline params::EnumParam& on() { return m_on; }

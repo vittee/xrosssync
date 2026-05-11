@@ -10,80 +10,7 @@ namespace xr18 {
 XR18Client::XR18Client()
     : m_rootNode(osc)
 {
-    m_channelStrips.reserve(static_cast<uint8_t>(ChannelStrip::StripIndex::MAX));
 
-    auto& state = m_rootNode.state();
-
-    auto& inputs = m_rootNode.channels();
-    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::Ch01); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::Ch16); i++) {
-        m_channelStrips.emplace_back(ChannelStrip::from(
-            inputs[i],
-            state.soloswAt(solowswIndices[i])
-        ));
-    }
-
-    {
-        m_channelStrips.emplace_back(ChannelStrip::from(
-            m_rootNode.aux(),
-            state.soloswAt(solowswIndices[static_cast<uint8_t>(ChannelStrip::StripIndex::AuxReturn)])
-        ));
-    }
-
-    auto& fxReturns = m_rootNode.fxReturns();
-    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::FxReturn1); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::FxReturn4); i++) {
-        m_channelStrips.emplace_back(ChannelStrip::from(
-            fxReturns[i - static_cast<uint8_t>(ChannelStrip::StripIndex::FxReturn1)],
-            state.soloswAt(solowswIndices[i])
-        ));
-    }
-
-    auto& buses = m_rootNode.buses();
-    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::Bus1); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::Bus6); i++) {
-        m_channelStrips.emplace_back(ChannelStrip::from(
-            buses[i - static_cast<uint8_t>(ChannelStrip::StripIndex::Bus1)],
-            state.soloswAt(solowswIndices[i])
-        ));
-    }
-
-    auto& fxSends = m_rootNode.fxSends();
-    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::FxSend1); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::FxSend4); i++) {
-        m_channelStrips.emplace_back(ChannelStrip::from(
-            fxSends[i - static_cast<uint8_t>(ChannelStrip::StripIndex::FxSend1)],
-            state.soloswAt(solowswIndices[i])
-        ));
-    }
-
-    auto& dcas = m_rootNode.dcas();
-    for (int i = static_cast<uint8_t>(ChannelStrip::StripIndex::DCA1); i <= static_cast<uint8_t>(ChannelStrip::StripIndex::DCA4); i++) {
-        m_channelStrips.emplace_back(ChannelStrip::from(
-            dcas[i - static_cast<uint8_t>(ChannelStrip::StripIndex::DCA1)],
-            state.soloswAt(solowswIndices[i])
-        ));
-    }
-
-    {
-        m_channelStrips.emplace_back(ChannelStrip::from(
-            m_rootNode.lr(),
-            state.soloswAt(solowswIndices[static_cast<uint8_t>(ChannelStrip::StripIndex::LR)])
-        ));
-    }
-
-    // register event handler for each strip
-    for (int i = 0; i < (int)m_channelStrips.size(); i++) {
-        auto stripIndex = static_cast<ChannelStrip::StripIndex>(i);
-        m_channelStrips[i].onEvent([this, stripIndex](ChannelStrip::ParamId paramId, params::Param* param) {
-            if (m_eventCallback) {
-                m_eventCallback({
-                    .type = Event::Type::StripChanged,
-                    .strip = {
-                        .index = stripIndex,
-                        .paramId = paramId,
-                        .param = param
-                    }
-                });
-            }
-        });
-    }
 }
 
 void XR18Client::start() {
@@ -348,6 +275,53 @@ void XR18Client::handleXINFO(OSCMessage &msg) {
 
 void XR18Client::onEvent(std::function<void(const Event&)> cb) {
     m_eventCallback = std::move(cb);
+}
+
+ChannelStrip* XR18Client::createChannelStrip(ChannelStrip::StripIndex index) {
+    uint8_t i = static_cast<uint8_t>(index);
+
+    if (i < 0 || i >= static_cast<uint8_t>(ChannelStrip::StripIndex::MAX)) {
+        return nullptr;
+    }
+
+    auto& solosw = m_rootNode.state().soloswAt(solowswIndices[i]);
+
+    if (index >= ChannelStrip::StripIndex::Ch01 && index <= ChannelStrip::StripIndex::Ch16) {
+        auto& ch = m_rootNode.channels()[i];
+        return ChannelStrip::from(ch, solosw);
+    }
+
+    if (index == ChannelStrip::StripIndex::AuxReturn) {
+        auto& ch = m_rootNode.aux();
+        return ChannelStrip::from(ch, solosw);
+    }
+
+    if (index >= ChannelStrip::StripIndex::FxReturn1 && index <= ChannelStrip::StripIndex::FxReturn4) {
+        auto& ch = m_rootNode.fxReturns()[i - static_cast<uint8_t>(ChannelStrip::StripIndex::FxReturn1)];
+        return ChannelStrip::from(ch, solosw);
+    }
+
+    if (index >= ChannelStrip::StripIndex::Bus1 && index <= ChannelStrip::StripIndex::Bus6) {
+        auto& ch = m_rootNode.buses()[i - static_cast<uint8_t>(ChannelStrip::StripIndex::Bus1)];
+        return ChannelStrip::from(ch, solosw);
+    }
+
+    if (index >= ChannelStrip::StripIndex::FxSend1 && index <= ChannelStrip::StripIndex::FxSend4) {
+        auto& ch = m_rootNode.fxSends()[i - static_cast<uint8_t>(ChannelStrip::StripIndex::FxSend1)];
+        return ChannelStrip::from(ch, solosw);
+    }
+
+    if (index >= ChannelStrip::StripIndex::DCA1 && index <= ChannelStrip::StripIndex::DCA4) {
+        auto& ch = m_rootNode.dcas()[i - static_cast<uint8_t>(ChannelStrip::StripIndex::DCA1)];
+        return ChannelStrip::from(ch, solosw);
+    }
+
+    if (index == ChannelStrip::StripIndex::LR) {
+        auto& ch = m_rootNode.lr();
+        return ChannelStrip::from(ch, solosw);
+    }
+
+    return nullptr;
 }
 
 }
