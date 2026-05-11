@@ -72,7 +72,7 @@ void App::touchTask() {
 
             bool isHome = (x == 85) && (y == 360);
 
-            lgfx::v1::touch_point_t lgfx_tp{ .x = x, .y = y, .size = 0, .id = 1 };
+            lgfx::touch_point_t lgfx_tp{ .x = x, .y = y, .size = 0, .id = 1 };
             m_display.panel()->convertRawXY(&lgfx_tp, 1);
             TouchPoint tp{ .x = lgfx_tp.x, .y = lgfx_tp.y };
 

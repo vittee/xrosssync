@@ -48,13 +48,13 @@ public:
 
     NodeType channelType() const { return m_type; }
 
-    params::StringParam& name() { return *m_name; }
-    params::IntParam& color() { return *m_color; }
-    params::EnumParam& on() { return *m_on; }
-    params::FaderParam& fader() { return *m_fader; }
-    bool hasPan() const { return m_pan != nullptr; }
-    params::LerpParam& pan() { return *m_pan; }
-    params::EnumParam& solosw() { return *m_solosw; }
+    inline params::StringParam& name() const { return *m_name; }
+    inline params::IntParam& color() { return *m_color; }
+    inline params::EnumParam& on() { return *m_on; }
+    inline params::FaderParam& fader() { return *m_fader; }
+    inline bool hasPan() const { return m_pan != nullptr; }
+    inline params::LerpParam& pan() { return *m_pan; }
+    inline params::EnumParam& solosw() { return *m_solosw; }
 
 private:
     ChannelStrip(

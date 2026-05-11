@@ -16,7 +16,7 @@ String FaderParam::formatValue() const {
     }
 
     char buf[32];
-    snprintf(buf, sizeof(buf), "%+5.1f", v);
+    snprintf(buf, sizeof(buf), "%.1f", v);
     return String(buf);
 }
 

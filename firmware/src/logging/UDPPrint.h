@@ -15,7 +15,6 @@ public:
     int availableForWrite() override;
     void flush() override;
 
-    void setDestination(IPAddress ip, uint16_t port);
     void startLogging(IPAddress ip, uint16_t port);
 
 private:

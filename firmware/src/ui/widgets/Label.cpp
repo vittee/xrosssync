@@ -99,13 +99,13 @@ void Label::render() {
     m_sprite.fillScreen(m_bgColor);
     m_sprite.setTextColor(m_textColor, m_bgColor);
 
-    m_sprite.drawString(m_text.c_str(), tx, ty);
+    m_sprite.drawString(m_text, tx, ty);
 }
 
 int16_t Label::measureWidth(const String& text, const lgfx::IFont* font) {
     LGFX_Sprite tmp;
     tmp.setFont(font);
-    return tmp.textWidth(text.c_str());
+    return tmp.textWidth(text);
 }
 
 int16_t Label::measureHeight(const lgfx::IFont* font) {

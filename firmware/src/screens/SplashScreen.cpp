@@ -6,11 +6,11 @@ SplashScreen::SplashScreen(int16_t w, int16_t h)
     m_sync(m_xross.w() + 4, 0, "Sync", &lgfx::fonts::FreeSansBold18pt7b, lgfx::color_depth_t::palette_1bit),
     m_row(0, 0, 0, 0)
 {
-    m_xross.setPaletteColor(0, lgfx::rgb565_t(TFT_BLACK));
-    m_xross.setPaletteColor(1, lgfx::rgb565_t(TFT_WHITE));
+    m_xross.setPaletteColor(0, TFT_BLACK);
+    m_xross.setPaletteColor(1, TFT_WHITE);
 
-    m_sync.setPaletteColor(0, lgfx::rgb565_t(TFT_BLACK));
-    m_sync.setPaletteColor(1, lgfx::rgb565_t(TFT_ORANGE));
+    m_sync.setPaletteColor(0, TFT_BLACK);
+    m_sync.setPaletteColor(1, TFT_ORANGE);
 
     m_row.add(&m_xross);
     m_row.add(&m_sync);

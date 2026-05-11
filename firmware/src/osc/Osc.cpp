@@ -134,7 +134,7 @@ bool Osc::send(OSCMessage& msg, TickType_t timeout, IPAddress destination, uint8
 
 bool Osc::receive(OSCMessage& msg, TickType_t timeout) {
     RawOsc raw{};
-    if (xQueueReceive(rxQueue, &raw, timeout) != pdTRUE) {
+    if (!xQueueReceive(rxQueue, &raw, timeout)) {
         return false;
     }
 
