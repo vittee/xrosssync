@@ -10,8 +10,8 @@ void UDPPrint::startLogging(IPAddress ip, uint16_t port) {
     m_ip = ip;
     m_port = port;
 
-    m_queue = xQueueCreate(32, sizeof(LogPacket));
 
+    m_queue = xQueueCreate(8, sizeof(LogPacket));
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<UDPPrint*>(inst)->senderTask();
     }, "udpprint", 4096, this, 2, &m_taskHandle, 1);
