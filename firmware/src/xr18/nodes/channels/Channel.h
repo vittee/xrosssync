@@ -12,12 +12,17 @@ namespace channels
 
 class Channel : public Node {
 public:
-    Channel(String name, Node* parent, NodeType type)
+    Channel(String nodeName, Node* parent, NodeType type)
         :
-        Node(name, parent)
+        Node(nodeName, parent)
     {
         this->m_type = type;
     }
+
+    inline const String& internalName() const { return m_internalName; }
+
+protected:
+    String m_internalName;
 };
 
 class InputChannel : public Channel {
