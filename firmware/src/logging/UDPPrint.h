@@ -26,6 +26,7 @@ private:
     };
 
     void senderTask();
+    void espLogTask();
 
     AsyncUDP m_udp;
     IPAddress m_ip = INADDR_NONE;
@@ -42,7 +43,7 @@ private:
         char buf[256];
     };
 
-    QueueHandle_t m_logQueue = nullptr;
+    QueueHandle_t m_espLogQueue = nullptr;
     TaskHandle_t m_logTaskHandle = nullptr;
 };
 

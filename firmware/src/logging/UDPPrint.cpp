@@ -10,31 +10,24 @@ void UDPPrint::startLogging(IPAddress ip, uint16_t port) {
     m_ip = ip;
     m_port = port;
 
-
     m_queue = xQueueCreate(8, sizeof(LogPacket));
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<UDPPrint*>(inst)->senderTask();
     }, "udpprint", 4096, this, 2, &m_taskHandle, 1);
 
-    m_logQueue = xQueueCreate(8, sizeof(LogMessage));
-
+    m_espLogQueue = xQueueCreate(8, sizeof(LogMessage));
     xTaskCreatePinnedToCore([](void* inst) {
-        auto* self = static_cast<UDPPrint*>(inst);
-        LogMessage msg;
-        for (;;) {
-            if (xQueueReceive(self->m_logQueue, &msg, portMAX_DELAY)) {
-                self->print(msg.buf);
-            }
-        }
-    }, "log_task", 2048, this, 1, &m_logTaskHandle, 0);
+        static_cast<UDPPrint*>(inst)->espLogTask();
+    }, "esp_log_task", 2048, this, 1, &m_logTaskHandle, 0);
 
     esp_log_set_vprintf([](const char* fmt, va_list args) -> int {
-        if (!udpPrint.m_logQueue) {
+        if (!udpPrint.m_espLogQueue) {
             return 0;
         }
+
         LogMessage msg;
         int len = vsnprintf(msg.buf, sizeof(msg.buf), fmt, args);
-        xQueueSend(udpPrint.m_logQueue, &msg, 0);
+        xQueueSend(udpPrint.m_espLogQueue, &msg, 0);
         return len;
     });
 }
@@ -113,6 +106,15 @@ void UDPPrint::senderTask() {
                 m_udp.writeTo(pkt.data, pkt.len, m_ip, m_port);
                 vTaskDelay(1);
             }
+        }
+    }
+}
+
+void UDPPrint::espLogTask() {
+    LogMessage msg;
+    for (;;) {
+        if (xQueueReceive(m_espLogQueue, &msg, portMAX_DELAY)) {
+            print(msg.buf);
         }
     }
 }
