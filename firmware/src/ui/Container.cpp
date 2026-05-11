@@ -13,12 +13,15 @@ void Container::add(BaseWidget* child) {
 }
 
 bool Container::isDirty() {
+    bool result = false;
+
     for (auto* child : m_children) {
         if (child->isDirty()) {
-            return true;
+            result = true;
         }
     }
-    return false;
+
+    return result;
 }
 
 void Container::draw(LovyanGFX& dst, int16_t offsetX, int16_t offsetY) {
