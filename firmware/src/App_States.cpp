@@ -88,9 +88,7 @@ App::AppState App::stateNormal(bool transited, TickType_t& delay) {
                 }
 
                 if (count < 1) {
-                    if (m_mainScreen) {
-                        m_mainScreen->setStatus({ MainScreen::Status::Type::NotConencted });
-                    }
+                    m_client.search();
                 }
 
                 break;
