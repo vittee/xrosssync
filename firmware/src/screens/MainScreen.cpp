@@ -6,7 +6,7 @@ MainScreen::MainScreen(App* app, int16_t w, int16_t h)
     : ui::Screen(w, h),
     m_app(app),
     m_statusBar(app, w, kStatusBarHeight),
-    m_panel(0, kStatusBarHeight + 2, w, h - kStatusBarHeight - 4)
+    m_panel(app, 0, kStatusBarHeight + 2, w, h - kStatusBarHeight - 4)
 {
     add(&m_statusBar);
     add(&m_panel);
@@ -113,4 +113,53 @@ bool MainScreen::StatusBar::isDirty() {
     }
 
     return result;
+}
+
+MainScreen::MixerPanel::MixerPanel(App* app, int16_t x, int16_t y, int16_t w, int16_t h)
+    : Container(x, y, w, h)
+{
+    // TODO: Ideally we should have a list of strip configs somewhere
+    // then only create 8 instances of ChannelStripPanel (and the actual ChannelStrip) for a page
+
+    auto constexpr count = kChannelPerPage * 5;
+    m_strips.reserve(count);
+
+    int16_t stripW = w / kChannelPerPage;
+
+    for (uint8_t i = 0; i < count; i++) {
+        m_strips.emplace_back(new ui::widgets::ChannelStripPanel(
+            (i % kChannelPerPage) * stripW, 0,
+            stripW,
+            h, app->client().createChannelStrip(
+                static_cast<xr18::ChannelStrip::StripIndex>(i)
+            )
+        ));
+    }
+
+    setPage(0);
+}
+
+MainScreen::MixerPanel::~MixerPanel() {
+    for (uint8_t i = 0; i < m_strips.size(); i++) {
+        delete m_strips[i];
+    }
+}
+
+void MainScreen::MixerPanel::setPage(int page) {
+    ESP_LOGD("MainScreen", "setPage(%d)", page);
+
+    if (page >= 0 && page < pageCount()) {
+        clear();
+
+        for (int i = 0; i < kChannelPerPage; i++) {
+            int index = page * kChannelPerPage + i;
+            auto strip = m_strips[index];
+
+            if (strip) {
+                add(strip);
+            }
+        }
+
+        m_page = page;
+    }
 }

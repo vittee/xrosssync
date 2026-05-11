@@ -7,6 +7,7 @@
 #include "ui/Container.h"
 #include "ui/widgets/Label.h"
 #include "ui/widgets/WifiIcon.h"
+#include "ui/widgets/ChannelStripPanel.h"
 
 class App;
 
@@ -63,30 +64,32 @@ private:
         static constexpr uint16_t kBgColor = lgfx::v1::color565(8, 8, 8);
     };
 
-    class Panel : public ui::Widget {
+    class MixerPanel : public ui::Container {
     public:
-        Panel(int16_t x, int16_t y, int16_t w, int16_t h)
-            : Widget(x, y, w, h)
-        {
+        MixerPanel(App* app, int16_t x, int16_t y, int16_t w, int16_t h);
+        ~MixerPanel();
 
-        }
+        bool isDirty() override { return true; }
 
-        void render() override {
-            int32_t color[8]{
-                TFT_RED, TFT_GREEN, TFT_BLUE, TFT_MAGENTA,
-                TFT_MAROON, TFT_GREENYELLOW, TFT_SKYBLUE, TFT_PURPLE
-            };
+        int pageCount() const { return (m_strips.size() + kChannelPerPage - 1) / kChannelPerPage; }
 
-            auto count = 8;
-            auto chw = 320 / count;
+        void setPage(int page);
 
-            for (int i = 0; i < count; i++) {
-                m_sprite.drawRect(i * chw, 0, chw, m_h, color[i]);
-            }
-        }
+        void nextPage() { setPage(m_page + 1); };
+
+        void prevPage() { setPage(m_page - 1); };
+
+        int page() const { return m_page; }
+
+    private:
+        int m_page = 0;
+
+        static constexpr uint8_t kChannelPerPage = 8;
+
+        std::vector<ui::widgets::ChannelStripPanel*> m_strips;
     };
 
     App* m_app;
     StatusBar m_statusBar;
-    Panel m_panel;
+    MixerPanel m_panel;
 };
