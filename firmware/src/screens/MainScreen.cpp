@@ -11,17 +11,29 @@ MainScreen::MainScreen(App* app, int16_t w, int16_t h)
 {
     add(&m_statusBar);
     add(&m_panel);
+
+    updatePageLabel();
 }
 
 MainScreen::StatusBar::StatusBar(App* app, int16_t w, int16_t h)
     : ui::Container(0, 0, w, h),
     m_app(app),
-    m_infoLabel(kXMargin, 0, w - kWifiWidth, h, "", &lgfx::fonts::Font0),
-    m_wifiIcon(w - kWifiWidth - kXMargin, 0, kWifiWidth, h)
+    m_infoLabel(kXMargin, 0, w - kWifiIconW - kPageLabelW - kXMargin, h, "", &lgfx::fonts::Font0, lgfx::color_depth_t::palette_1bit),
+    m_wifiIcon(w - kWifiIconW - kXMargin, 0, kWifiIconW, h),
+    m_pageLabel(w - kWifiIconW - kXMargin - kPageLabelW - kXMargin, 0, kPageLabelW, h, "", &lgfx::fonts::Font0, lgfx::color_depth_t::palette_1bit)
 {
+    m_infoLabel.setPaletteColor(0, kBgColor);
+    m_infoLabel.setPaletteColor(1, TFT_WHITE);
     m_infoLabel.setVAlign(ui::widgets::Label::VAlign::Middle);
-    m_infoLabel.setTextColor(TFT_WHITE);
-    m_infoLabel.setBackgroundColor(kBgColor);
+    m_infoLabel.setTextColor(1);
+    m_infoLabel.setBackgroundColor(0);
+
+    m_pageLabel.setPaletteColor(0, kBgColor);
+    m_pageLabel.setPaletteColor(1, TFT_CYAN);
+    m_pageLabel.setVAlign(ui::widgets::Label::VAlign::Middle);
+    m_pageLabel.setHAlign(ui::widgets::Label::HAlign::Right);
+    m_pageLabel.setTextColor(1);
+    m_pageLabel.setBackgroundColor(0);
 
     m_wifiIcon.setBackgroundColor(kBgColor);
 
@@ -91,6 +103,10 @@ void MainScreen::StatusBar::updateStatusLabel() {
 
 void MainScreen::StatusBar::updateRSSI() {
     m_wifiIcon.setRSSI(m_status.type != Status::Type::NoWifi ? WiFi.RSSI() : -100);
+}
+
+void MainScreen::StatusBar::updatePageLabel(int pageNumber, int count) {
+    m_pageLabel.setText(String(pageNumber) + "/" + String(count));
 }
 
 bool MainScreen::StatusBar::isDirty() {

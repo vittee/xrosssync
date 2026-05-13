@@ -36,15 +36,17 @@ public:
         m_statusBar.setStatus(status);
     }
 
-    inline void nextPage() { m_panel.nextPage(); };
+    void nextPage() { m_panel.nextPage(); updatePageLabel(); };
 
-    inline void prevPage() { m_panel.prevPage(); };
+    void prevPage() { m_panel.prevPage(); updatePageLabel(); };
 
-    inline void firstPage() { m_panel.setPage(0); };
+    void firstPage() { m_panel.setPage(0); updatePageLabel(); };
 
     inline int page() const { return m_panel.page(); }
 
 private:
+    inline void updatePageLabel() { m_statusBar.updatePageLabel(page() + 1, m_panel.pageCount()); }
+
     class StatusBar : public ui::Container {
     public:
         StatusBar(App* app, int16_t w, int16_t h);
@@ -54,11 +56,17 @@ private:
         bool isDirty() override;
 
     private:
+        friend class MainScreen;
+
         void updateStatusLabel();
 
         void updateRSSI();
 
+        void updatePageLabel(int pageNumber, int count);
+
         ui::widgets::Label m_infoLabel;
+
+        ui::widgets::Label m_pageLabel;
         ui::widgets::WifiIcon m_wifiIcon;
 
         App* m_app;
@@ -67,7 +75,8 @@ private:
         uint32_t m_lastCycleMs = 0;
         uint32_t m_lastWiFiMs = 0;
 
-        static constexpr int16_t kWifiWidth = 20;
+        static constexpr int16_t kWifiIconW = 20;
+        static constexpr int16_t kPageLabelW = 20;
         static constexpr int16_t kXMargin = 2;
         static constexpr uint16_t kBgColor = lgfx::color565(8, 8, 8);
     };
