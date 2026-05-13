@@ -2,6 +2,7 @@
 
 #include "ui/Widget.h"
 #include "xr18/ChannelStrip.h"
+#include <atomic>
 
 namespace ui {
 namespace widgets {
@@ -21,6 +22,7 @@ private:
 
     xr18::ChannelStrip* m_strip = nullptr;
     LGFX_Sprite m_nameSprite;
+    std::atomic<bool> m_nameDirty{false};
     int scrollPos = 0;
     int overflowSize = 0;
     int scrollDir = -1;

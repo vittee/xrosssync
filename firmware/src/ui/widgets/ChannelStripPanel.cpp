@@ -56,13 +56,13 @@ ChannelStripPanel::ChannelStripPanel(int16_t x, int16_t y, int16_t w, int16_t h,
     m_nameSprite.setFont(&lgfx::fonts::Font2);
 
     if (m_strip) {
-        renderNameSprite();
+        m_nameDirty.store(true);
 
         m_strip->onEvent([this](xr18::ChannelStrip::ParamId paramId, xr18::nodes::params::Param*) {
             switch (paramId) {
                 case xr18::ChannelStrip::ParamId::Name:
                 case xr18::ChannelStrip::ParamId::Color:
-                    renderNameSprite();
+                    m_nameDirty.store(true);
                     break;
             }
 
@@ -78,6 +78,10 @@ ChannelStripPanel::~ChannelStripPanel() {
 }
 
 void ChannelStripPanel::renderNameSprite() {
+    if (!m_strip) {
+        return;
+    }
+
     String nameStr = m_strip->internalName();
     String configName = m_strip->name().formatValue();
 
@@ -117,6 +121,9 @@ void ChannelStripPanel::renderNameSprite() {
 }
 
 void ChannelStripPanel::render() {
+    if (m_nameDirty.exchange(false)) {
+        renderNameSprite();
+    }
 
 
     m_sprite.fillScreen(kColorBlack);
