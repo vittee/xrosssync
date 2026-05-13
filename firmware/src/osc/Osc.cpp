@@ -49,7 +49,7 @@ void Osc::start() {
 
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<Osc*>(inst)->txTask();
-    }, "osc_tx", 4096, this, 2, &txTaskHandle, 1);
+    }, "osc_tx", 8192, this, 2, &txTaskHandle, 1);
 }
 
 void Osc::stop() {

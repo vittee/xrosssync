@@ -18,7 +18,7 @@ void UDPPrint::startLogging(IPAddress ip, uint16_t port) {
     m_espLogQueue = xQueueCreate(8, sizeof(LogMessage));
     xTaskCreatePinnedToCore([](void* inst) {
         static_cast<UDPPrint*>(inst)->espLogTask();
-    }, "esp_log_task", 2048, this, 1, &m_logTaskHandle, 0);
+    }, "esp_log_task", 4096, this, 1, &m_logTaskHandle, 0);
 
     esp_log_set_vprintf([](const char* fmt, va_list args) -> int {
         if (!udpPrint.m_espLogQueue) {
