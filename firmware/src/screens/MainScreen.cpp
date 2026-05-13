@@ -39,6 +39,7 @@ MainScreen::StatusBar::StatusBar(App* app, int16_t w, int16_t h)
 
     add(&m_infoLabel);
     add(&m_wifiIcon);
+    add(&m_pageLabel);
 
     setStatus({ Status::Type::NoWifi });
 }
