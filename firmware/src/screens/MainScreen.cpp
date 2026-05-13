@@ -1,6 +1,7 @@
 #include "MainScreen.h"
 #include "App.h"
 #include <WiFi.h>
+#include "psram.h"
 
 MainScreen::MainScreen(App* app, int16_t w, int16_t h)
     : ui::Screen(w, h),
@@ -127,13 +128,16 @@ MainScreen::MixerPanel::MixerPanel(App* app, int16_t x, int16_t y, int16_t w, in
     int16_t stripW = w / kChannelPerPage;
 
     for (uint8_t i = 0; i < count; i++) {
-        m_strips.emplace_back(new ui::widgets::ChannelStripPanel(
+        void* mem = heap_caps_malloc(sizeof(ui::widgets::ChannelStripPanel), MALLOC_CAP_SPIRAM);
+        auto panel = psram_new<ui::widgets::ChannelStripPanel>(
             (i % kChannelPerPage) * stripW, 0,
             stripW,
             h, app->client().createChannelStrip(
                 static_cast<xr18::ChannelStrip::StripIndex>(i)
             )
-        ));
+        );
+
+        m_strips.emplace_back(panel);
     }
 
     setPage(0);
@@ -141,7 +145,7 @@ MainScreen::MixerPanel::MixerPanel(App* app, int16_t x, int16_t y, int16_t w, in
 
 MainScreen::MixerPanel::~MixerPanel() {
     for (uint8_t i = 0; i < m_strips.size(); i++) {
-        delete m_strips[i];
+        psram_delete(m_strips[i]);
     }
 }
 

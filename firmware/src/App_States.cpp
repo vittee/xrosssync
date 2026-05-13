@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include "App.h"
+#include "psram.h"
 #include "screens/MainScreen.h"
 
 #ifdef XROSSSYNC_DEBUG
@@ -42,9 +43,9 @@ App::AppState App::stateNormal(bool transited, TickType_t& delay) {
 #endif
 
         m_display.fillScreen(TFT_BLACK);
-        m_mainScreen = new MainScreen(this, m_display.width(), m_display.height());
+        m_mainScreen = psram_new<MainScreen>(this, m_display.width(), m_display.height());
         setScreen(m_mainScreen);
-        delete m_splashScreen;
+        psram_delete(m_splashScreen);
         m_splashScreen = nullptr;
     }
 
@@ -54,8 +55,8 @@ App::AppState App::stateNormal(bool transited, TickType_t& delay) {
             case AppEvent::Type::WiFiConnected:
                 wifiFailures = 0;
 
-                if (!m_client.connected()) {
-                    m_client.search();
+                if (!m_client->connected()) {
+                    m_client->search();
                 }
 
                 break;
@@ -82,13 +83,13 @@ App::AppState App::stateNormal(bool transited, TickType_t& delay) {
                 break;
 
             case AppEvent::Type::MixerSearchStop: {
-                auto count = m_client.mixers().size();
+                auto count = m_client->mixers().size();
                 if (count > 1) {
                     return AppState::SelectMixer;
                 }
 
                 if (count < 1) {
-                    m_client.search();
+                    m_client->search();
                 }
 
                 break;

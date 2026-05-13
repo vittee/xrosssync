@@ -44,6 +44,16 @@ public:
     static ChannelStrip* from(channels::DCAChannel& ch, params::EnumParam& solosw);
     static ChannelStrip* from(channels::MainChannel& ch, params::EnumParam& solosw);
 
+    ChannelStrip(
+        channels::Channel m_ch,
+        params::StringParam& name,
+        params::IntParam& color,
+        params::EnumParam& on,
+        params::FaderParam& fader,
+        params::LerpParam* pan,
+        params::EnumParam& solosw
+    );
+
     void onEvent(ChannelEventFn cb);
 
     inline NodeType channelType() const { return m_ch.type(); }
@@ -58,18 +68,6 @@ public:
     inline params::EnumParam& solosw() { return *m_solosw; }
 
 private:
-    friend class XR18Client;
-
-    ChannelStrip(
-        channels::Channel m_ch,
-        params::StringParam& name,
-        params::IntParam& color,
-        params::EnumParam& on,
-        params::FaderParam& fader,
-        params::LerpParam* pan,
-        params::EnumParam& solosw
-    );
-
     NodeType m_type;
     channels::Channel m_ch;
     params::StringParam* m_name;

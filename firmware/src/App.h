@@ -19,7 +19,7 @@ public:
 
     bool init();
 
-    inline xr18::XR18Client& client() { return m_client; }
+    inline xr18::XR18Client& client() { return *m_client; }
 
 private:
     class Display : public lgfx::LGFX_Device {
@@ -152,7 +152,7 @@ private:
     QueueHandle_t inputEventQueue;
     InputEvent lastInputEvent{};
 
-    xr18::XR18Client m_client;
+    xr18::XR18Client* m_client;
 
     static constexpr uint8_t PIN_BUTTON_1 = 0;
     static constexpr uint8_t PIN_BUTTON_2 = 14;

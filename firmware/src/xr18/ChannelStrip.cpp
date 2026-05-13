@@ -1,4 +1,5 @@
 #include "ChannelStrip.h"
+#include "psram.h"
 
 namespace xr18 {
 
@@ -54,7 +55,7 @@ void ChannelStrip::onEvent(ChannelEventFn cb) {
 }
 
 ChannelStrip* ChannelStrip::from(channels::InputChannel& ch, params::EnumParam& solosw) {
-    return new ChannelStrip(
+    return psram_new<ChannelStrip>(
         ch,
         ch.config().name(),
         ch.config().color(),
@@ -66,7 +67,7 @@ ChannelStrip* ChannelStrip::from(channels::InputChannel& ch, params::EnumParam& 
 }
 
 ChannelStrip* ChannelStrip::from(channels::ReturnChannel& ch, params::EnumParam& solosw) {
-    return new ChannelStrip(
+    return psram_new<ChannelStrip>(
         ch,
         ch.config().name(),
         ch.config().color(),
@@ -78,7 +79,7 @@ ChannelStrip* ChannelStrip::from(channels::ReturnChannel& ch, params::EnumParam&
 }
 
 ChannelStrip* ChannelStrip::from(channels::BusChannel& ch, params::EnumParam& solosw) {
-    return new ChannelStrip(
+    return psram_new<ChannelStrip>(
         ch,
         ch.config().name(),
         ch.config().color(),
@@ -90,7 +91,7 @@ ChannelStrip* ChannelStrip::from(channels::BusChannel& ch, params::EnumParam& so
 }
 
 ChannelStrip* ChannelStrip::from(channels::FxSendChannel& ch, params::EnumParam& solosw) {
-    return new ChannelStrip(
+    return psram_new<ChannelStrip>(
         ch,
         ch.config().name(),
         ch.config().color(),
@@ -102,7 +103,7 @@ ChannelStrip* ChannelStrip::from(channels::FxSendChannel& ch, params::EnumParam&
 }
 
 ChannelStrip* ChannelStrip::from(channels::DCAChannel& ch, params::EnumParam& solosw) {
-    return new ChannelStrip(
+    return psram_new<ChannelStrip>(
         ch,
         ch.config().name(),
         ch.config().color(),
@@ -114,7 +115,7 @@ ChannelStrip* ChannelStrip::from(channels::DCAChannel& ch, params::EnumParam& so
 }
 
 ChannelStrip* ChannelStrip::from(channels::MainChannel& ch, params::EnumParam& solosw) {
-    return new ChannelStrip(
+    return psram_new<ChannelStrip>(
         ch,
         ch.config().name(),
         ch.config().color(),

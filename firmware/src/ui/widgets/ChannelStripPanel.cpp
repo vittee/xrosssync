@@ -1,4 +1,5 @@
 #include "ChannelStripPanel.h"
+#include "psram.h"
 
 namespace ui {
 namespace widgets {
@@ -72,7 +73,7 @@ ChannelStripPanel::ChannelStripPanel(int16_t x, int16_t y, int16_t w, int16_t h,
 
 ChannelStripPanel::~ChannelStripPanel() {
     if (m_strip) {
-        delete m_strip;
+        psram_delete(m_strip);
     }
 }
 

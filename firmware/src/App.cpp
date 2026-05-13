@@ -1,10 +1,11 @@
 #include <WiFi.h>
 #include "App.h"
+#include "psram.h"
 #include "screens/SplashScreen.h"
 #include "screens/MainScreen.h"
 
 App::App() {
-
+    m_client = psram_new<xr18::XR18Client>();
 }
 
 bool App::init() {
@@ -55,7 +56,7 @@ bool App::init() {
     }
 
     {
-        m_splashScreen = new SplashScreen(m_display.width(), m_display.height());
+        m_splashScreen = psram_new<SplashScreen>(m_display.width(), m_display.height());
         m_screen = m_splashScreen;
 
         xTaskCreatePinnedToCore([](void* inst) {
@@ -79,7 +80,7 @@ bool App::init() {
     WiFi.mode(WIFI_STA);
     WiFi.begin();
 
-    m_client.onEvent([this](const xr18::XR18Client::Event& e) {
+    m_client->onEvent([this](const xr18::XR18Client::Event& e) {
         switch (e.type) {
             case xr18::XR18Client::Event::Type::SearchStarted:
                 postAppEvent({ AppEvent::Type::MixerSearchStarted });
@@ -107,7 +108,7 @@ bool App::init() {
         static_cast<App*>(inst)->appTask();
     }, "app_task", 8192, this, 1, nullptr, 1);
 
-    m_client.start();
+    m_client->start();
 
     return true;
 }
