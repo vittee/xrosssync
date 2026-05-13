@@ -17,10 +17,6 @@ protected:
 
 private:
     int8_t m_rssi = -100;
-    int32_t m_bgColor = 0;
-
-    static constexpr lgfx::rgb565_t kColorConnected{0x07E0};
-    static constexpr lgfx::rgb565_t kColorDim{0x4208};
 };
 
 } // namespace widgets
