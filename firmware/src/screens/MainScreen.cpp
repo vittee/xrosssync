@@ -1,6 +1,6 @@
+#include <WiFi.h>
 #include "MainScreen.h"
 #include "App.h"
-#include <WiFi.h>
 #include "psram.h"
 
 MainScreen::MainScreen(App* app, int16_t w, int16_t h)
@@ -66,7 +66,6 @@ void MainScreen::StatusBar::setStatus(const Status& status) {
             updateStatusLabel();
             return;
     }
-
 
     updateRSSI();
 }

@@ -96,7 +96,7 @@ void Label::render() {
     m_sprite.setFont(m_font);
     m_sprite.setTextDatum(kDatumTable[(int)m_vAlign][(int)m_hAlign]);
 
-    m_sprite.fillScreen(m_bgColor);
+    m_sprite.fillSprite(m_bgColor);
     m_sprite.setTextColor(m_textColor, m_bgColor);
 
     m_sprite.drawString(m_text, tx, ty);

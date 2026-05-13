@@ -126,8 +126,7 @@ void ChannelStripPanel::render() {
         renderNameSprite();
     }
 
-
-    m_sprite.fillScreen(kColorBlack);
+    m_sprite.fillSprite(kColorBlack);
     m_sprite.drawFastVLine(m_w - 1, 0, m_h, kColorDarkGrey);
 
     if (!m_strip) {
