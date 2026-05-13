@@ -3,13 +3,13 @@
 namespace ui {
 namespace widgets {
 
-Label::Label(int16_t x, int16_t y, const String& text, const lgfx::IFont* font, lgfx::color_depth_t colorDepth)
+Label::Label(int16_t x, int16_t y, const String& text, const IFont* font, color_depth_t colorDepth)
     : Label(x, y, measureWidth(text, font), measureHeight(font), text, font, colorDepth)
 {
 
 }
 
-Label::Label(int16_t x, int16_t y, int16_t w, int16_t h, const String& text, const lgfx::IFont* font, lgfx::color_depth_t colorDepth)
+Label::Label(int16_t x, int16_t y, int16_t w, int16_t h, const String& text, const IFont* font, color_depth_t colorDepth)
     : Widget(x, y, w, h, colorDepth),
     m_text(text),
     m_font(font ? font: &lgfx::fonts::Font4)
@@ -25,7 +25,7 @@ void Label::setText(const String& text) {
     invalidate();
 }
 
-void Label::setFont(const lgfx::IFont* font) {
+void Label::setFont(const IFont* font) {
     m_font = font;
     invalidate();
 }
@@ -55,7 +55,7 @@ void Label::setBackgroundColor(int32_t color) {
     invalidate();
 }
 
-void Label::setPaletteColor(uint8_t index, lgfx::rgb565_t color) {
+void Label::setPaletteColor(uint8_t index, rgb565_t color) {
     m_sprite.setPaletteColor(index, color);
     invalidate();
 }
@@ -102,13 +102,13 @@ void Label::render() {
     m_sprite.drawString(m_text, tx, ty);
 }
 
-int16_t Label::measureWidth(const String& text, const lgfx::IFont* font) {
+int16_t Label::measureWidth(const String& text, const IFont* font) {
     LGFX_Sprite tmp;
     tmp.setFont(font);
     return tmp.textWidth(text);
 }
 
-int16_t Label::measureHeight(const lgfx::IFont* font) {
+int16_t Label::measureHeight(const IFont* font) {
     LGFX_Sprite tmp;
     tmp.setFont(font);
     return tmp.fontHeight();

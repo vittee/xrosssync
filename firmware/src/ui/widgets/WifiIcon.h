@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Widget.h"
+#include "ui/Widget.h"
 
 namespace ui {
 namespace widgets {
