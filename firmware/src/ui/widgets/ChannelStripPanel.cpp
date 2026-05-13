@@ -52,6 +52,7 @@ ChannelStripPanel::ChannelStripPanel(int16_t x, int16_t y, int16_t w, int16_t h,
         m_sprite.setPaletteColor(i, kPalette[i]);
     }
 
+    m_nameSprite.setPsram(true);
     m_nameSprite.setColorDepth(lgfx::color_depth_t::palette_4bit);
     m_nameSprite.setFont(&lgfx::fonts::Font2);
 
